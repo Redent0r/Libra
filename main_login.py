@@ -3,6 +3,7 @@ import sys
 import sqlite3
 
 from PyQt4 import QtGui
+from PyQt4 import QtCore
 
 from gui_login import Ui_Dialog as LoginGui
 
@@ -46,6 +47,7 @@ class Login(QtGui.QDialog, LoginGui):
         e.accept()
 
 
+
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     login = Login()
@@ -54,3 +56,4 @@ if __name__ == "__main__":
     else:
         print('login unsuccessful')
     sys.exit(app.exec_())
+

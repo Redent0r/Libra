@@ -30,7 +30,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Inventario</string>
+   <string>Libra</string>
   </property>
   <property name="windowIcon">
    <iconset resource="res.qrc">

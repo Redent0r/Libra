@@ -71,7 +71,7 @@ class Ui_Dialog(object):
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(_translate("Dialog", "Inventario", None))
+        Dialog.setWindowTitle(_translate("Dialog", "Libra", None))
         self.label.setText(_translate("Dialog", "Libra", None))
         self.leditUsuario.setPlaceholderText(_translate("Dialog", "Usuario", None))
         self.leditPassword.setPlaceholderText(_translate("Dialog", "Contraseña", None))
