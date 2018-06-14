@@ -1,0 +1,29 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>resources/undo-512.png</file>
+    <file>resources/edit_user_male_write_pencil_man-512.png</file>
+    <file>resources/dbIcon.ico</file>
+    <file>resources/swap-512.png</file>
+    <file>resources/payment-256.png</file>
+    <file>resources/search-loop-512.png</file>
+    <file>resources/9-512.png</file>
+    <file>resources/edit_write_pencil_pen_page-512.png</file>
+    <file>resources/access-512.png</file>
+    <file>resources/product_basket-512.png</file>
+    <file>resources/Oxygen-Icons.org-Oxygen-Actions-view-refresh.ico</file>
+    <file>resources/15656.png</file>
+    <file>resources/cart-arrow-down-512.png</file>
+    <file>resources/manager-512.png</file>
+    <file>resources/cashier-icon-png-8.png</file>
+    <file>resources/paper-box-icon-63457.png</file>
+    <file>resources/calculator.png</file>
+    <file>resources/Custom-Icon-Design-Pretty-Office-3-Inventory-maintenance.ico</file>
+    <file>resources/Custom-Icon-Design-Pretty-Office-7-Save.ico</file>
+    <file>resources/empty-cart-dark.png</file>
+    <file>resources/new_file.png</file>
+    <file>resources/plus-icon-0.png</file>
+    <file>resources/refresh.png</file>
+    <file>resources/Remove.png</file>
+    <file>resources/Package-Accept.ico</file>
+  </qresource>
+</RCC>
