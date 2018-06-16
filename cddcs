@@ -1,0 +1,23 @@
+* [31m47b4a8d[m -[33m (HEAD -> master)[m deleted cmboxClients usage in master_admin.py [32m(3 minutes ago) [1;34m<JP>[m
+* [31m94fec44[m -[33m[m deleted reverse sale button from gui [32m(4 days ago) [1;34m<JP>[m
+* [31m698b338[m -[33m[m deleted reverse sale functions from mec_inventory [32m(4 days ago) [1;34m<JP>[m
+* [31m082830a[m -[33m[m deleted reverse sale function on master_admin [32m(4 days ago) [1;34m<JP>[m
+* [31mb2a2096[m -[33m[m deleted remove purchase button on gui inventory [32m(4 days ago) [1;34m<JP>[m
+* [31mf9c25f0[m -[33m[m deleted remove purchase function from master_admin [32m(4 days ago) [1;34m<JP>[m
+* [31m233d477[m -[33m[m deleted remove client button from gui_inventory.py [32m(4 days ago) [1;34m<JP>[m
+* [31m724b0c3[m -[33m[m deleted remove client function from master_admin.py in previous commit(ignore previous message), also deleted del_client_id and del_client_nam in mec_inventory.py [32m(4 days ago) [1;34m<JP>[m
+* [31m8c5440d[m -[33m[m deleted remove sale function from master_admin.py [32m(4 days ago) [1;34m<JP>[m
+* [31md4aaeba[m -[33m[m deleted ModifyInventory files .py and .ui [32m(7 days ago) [1;34m<JP>[m
+* [31m541d84c[m -[33m[m deleted Modify Inventory button from gui_inventory [32m(7 days ago) [1;34m<JP>[m
+* [31m58b53b5[m -[33m[m deleted Modify Inventory functions from mec_inventory.py [32m(7 days ago) [1;34m<JP>[m
+* [31m22e234f[m -[33m[m deleted Modify Inventory functions and classes from master_admin.py [32m(7 days ago) [1;34m<JP>[m
+* [31m6c67bfe[m -[33m[m deleted all gui_client_modify elements [32m(7 days ago) [1;34m<JP>[m
+* [31m961fd41[m -[33m[m deleted btnModifyClient from gui_inventory [32m(7 days ago) [1;34m<JP>[m
+* [31m7ba5b34[m -[33m[m deleted ModifyClient functions from mec_inventory.py [32m(7 days ago) [1;34m<JP>[m
+* [31m49995e9[m -[33m[m deleted ModifyClient functions and classes from master_admin.py [32m(7 days ago) [1;34m<JP>[m
+* [31m91ea3c3[m -[33m[m deleted move button from gui_inventory.py [32m(7 days ago) [1;34m<JP>[m
+* [31me029e96[m -[33m[m forgot to delete move item function from master_admin and btnMove from constructor [32m(7 days ago) [1;34m<JP>[m
+* [31mbcabf48[m -[33m[m deleted Move elements from mec_inventory [32m(7 days ago) [1;34m<JP>[m
+* [31m3d301cb[m -[33m[m deleted Move elements from mec_inventory [32m(7 days ago) [1;34m<JP>[m
+* [31mb704a0b[m -[33m[m deleted Move elements from master_admin [32m(7 days ago) [1;34m<JP>[m
+* [31mac7d1af[m -[33m[m FINAL Libra-EN with fixed move [32m(7 days ago) [1;34m<JP>[m
