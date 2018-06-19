@@ -16,6 +16,19 @@ class Login(QtGui.QDialog, LoginGui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
 
+        ### database ###
+        self.conn = sqlite3.connect(".libra.db")
+        self.c = self.conn.cursor()
+        mec_login.create_login_table(self.c, self.conn)
+        self.show()
+
+    def closeEvent(self, e):
+        print("closing")
+        self.c.close()
+        self.conn.close()
+        e.accept()
+
+
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     login = Login()
