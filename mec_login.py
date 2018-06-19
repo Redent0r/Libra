@@ -16,3 +16,12 @@ def create_login_table(cursor,connection):#Creates login table.
         print("...............Account added")
     connection.commit()
     return True
+
+def check_login(cursor,username,password):# Logs in ,returns current user.
+    a = (username,password,)
+    cursor.execute("SELECT User,Pass FROM login WHERE User = ? AND Pass = ?",a)
+    data = cursor.fetchone()#Returns a single tuple.
+    if data == None:#f returns type None.
+        print("Not registered")
+        return False
+    return True     

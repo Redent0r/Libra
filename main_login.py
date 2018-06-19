@@ -8,6 +8,8 @@ from gui_login import Ui_Dialog as LoginGui
 import master_admin
 
 import mec_login
+from mec_login import check_login # tengo que importarlo
+
 
 class Login(QtGui.QDialog, LoginGui):
 
