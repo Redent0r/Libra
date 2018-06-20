@@ -29,7 +29,19 @@ class Login(QtGui.QDialog, LoginGui):
         self.show()
 
     def start(self):
-        pass
+
+        usuario = self.leditUser.text()
+        password = self.leditPassword.text()
+
+        if check_login(self.c, usuario, password):
+            print("success")
+            self.accept()
+
+        else:
+            self.leditUser.clear()
+            self.leditPassword.clear()
+            QtGui.QMessageBox.warning(self, 'Error', 'Incorrect username or password')
+
 
     def closeEvent(self, e):
         print("closing")
