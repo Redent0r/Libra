@@ -26,6 +26,11 @@ def check_login(cursor,username,password):# Logs in ,returns current user.
         return False
     return True     
 
+def print_login_table(cursor):
+    elems = cursor.execute("SELECT * FROM login")
+    data = cursor.fetchall()
+    for row in data:
+        print(row)
 def check_if_admin(cursor,username):
     a =(username,)
     cursor.execute("SELECT class FROM login WHERE User = ?",a)
