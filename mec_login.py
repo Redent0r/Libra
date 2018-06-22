@@ -26,6 +26,24 @@ def check_login(cursor,username,password):# Logs in ,returns current user.
         return False
     return True     
 
+def add_user(cursor,username,password):
+    a = (username,)
+    b = (username,password,)
+    cursor.execute("SELECT User FROM login WHERE User =?", a)
+    data = cursor.fetchone()
+    if data == None:
+        print("Username not valid")
+        if len(password) < 8:
+            print("Must be at least 8 characters.")
+            return False
+        cursor.execute("INSERT INTO login (User, Pass,class,dat) VALUES (?,?,'regular',date('now'))", b)
+        print("Succesful registration.")
+        return True
+    else:
+        print("Already registered")
+        return False
+
+
 def print_login_table(cursor):
     elems = cursor.execute("SELECT * FROM login")
     data = cursor.fetchall()
