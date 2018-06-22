@@ -25,3 +25,24 @@ def check_login(cursor,username,password):# Logs in ,returns current user.
         print("Not registered")
         return False
     return True     
+
+def check_if_admin(cursor,username):
+    a =(username,)
+    cursor.execute("SELECT class FROM login WHERE User = ?",a)
+    data = cursor.fetchone()
+    if data == None:
+        return False
+    elif data[0] == 'admin':
+        return True
+    else:
+        return False
+def remove_user():
+    pass
+
+def log_out(cursor,connection):
+    print('')
+    print('.................Closing')
+    connection.commit()
+    cursor.close()
+    sys.exit()
+    
