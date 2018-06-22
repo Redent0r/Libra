@@ -26,6 +26,22 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         QtGui.QMainWindow.__init__(self, parent) # parent shit for exit bug; object hierarchy
         self.setupUi(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose) # maybe takes care of closing bug
+
+    def closeEvent(self,event):
+
+        msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Warning",
+                                    "Are you sure you want to exit?", parent=self)
+        btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+        btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+        msgbox.exec_()
+
+        if msgbox.clickedButton() == btnYes:
+            event.accept()
+
+        else:
+            event.ignore()
+
 ##################### starts everything #############################################
 if __name__ == "__main__":
 
