@@ -42,12 +42,33 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.gridLayout = QtGui.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.tabWidget = QtGui.QTabWidget(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.tabWidget.setFont(font)
+        self.tabWidget.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
+        self.tabWidget.setTabPosition(QtGui.QTabWidget.North)
+        self.tabWidget.setTabShape(QtGui.QTabWidget.Rounded)
+        self.tabWidget.setIconSize(QtCore.QSize(25, 25))
+        self.tabWidget.setElideMode(QtCore.Qt.ElideNone)
+        self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
+        self.tab_balance = QtGui.QWidget()
+        self.tab_balance.setObjectName(_fromUtf8("tab_balance"))
+        self.verticalLayout_3 = QtGui.QVBoxLayout(self.tab_balance)
+        self.verticalLayout_3.setMargin(0)
+        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/resources/calculator.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.tabWidget.addTab(self.tab_balance, icon1, _fromUtf8(""))
+        self.gridLayout.addWidget(self.tabWidget, 0, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Libra v1.0.0", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_balance), _translate("MainWindow", "Balance", None))
 
 import res_rc
