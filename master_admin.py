@@ -32,13 +32,33 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.db.setDatabaseName(self.DB_LOCATION)
         self.db.open()
 
+         ### Table Models ###
+        self.mdlInventory = QtSql.QSqlQueryModel()
+
+        ### Actions functionality ###
+        self.actionRefresh.triggered.connect(self.refreshTables)
+
         ### Creates tables if not exists, for mec_inventario ###
         self.conn = sqlite3.connect(self.DB_LOCATION)
         self.c = self.conn.cursor()
         mec_inventory.create_tables(self.conn, self.c)
 
+        # bal stretch
+        self.tblBalance.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.tblBalance.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+
         end = time.time()
         print("constructor time: " + str(end - start))
+
+    def refreshTables(self):
+
+        start = time.time()
+
+        self.mdlInventory.setQuery("""SELECT code, name, groupx, avail, costUni, priceUniSug,
+                                   stockmin, stockmax, category FROM Inventory""", self.db)
+
+        end = time.time()
+        print("refresh time: " + str(end - start))
 
     def closeEvent(self,event):
 
