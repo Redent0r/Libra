@@ -27,6 +27,19 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.setupUi(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose) # maybe takes care of closing bug
 
+        ### Database Connection, for qsqlquerymodel ###
+        self.db = QtSql.QSqlDatabase.addDatabase('QSQLITE')
+        self.db.setDatabaseName(self.DB_LOCATION)
+        self.db.open()
+
+        ### Creates tables if not exists, for mec_inventario ###
+        self.conn = sqlite3.connect(self.DB_LOCATION)
+        self.c = self.conn.cursor()
+        mec_inventory.create_tables(self.conn, self.c)
+
+        end = time.time()
+        print("constructor time: " + str(end - start))
+
     def closeEvent(self,event):
 
         msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Warning",
@@ -37,6 +50,10 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         msgbox.exec_()
 
         if msgbox.clickedButton() == btnYes:
+
+            self.db.close()
+            self.c.close()
+            self.conn.close()
             event.accept()
 
         else:
