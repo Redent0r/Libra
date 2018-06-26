@@ -18,3 +18,11 @@ def create_tables(connection,cursor):
 
     connection.commit()
     return True
+ 
+#-------------------------------------------------------------------------------------------------------
+def print_(cursor,table):#Print any table.
+    cursor.execute('SELECT * FROM '+ table)
+    data = cursor.fetchall()
+    for row in data:
+        print(row)
+    return True
