@@ -68,6 +68,12 @@ class Ui_MainWindow(object):
         self.verticalLayout_7 = QtGui.QVBoxLayout()
         self.verticalLayout_7.setContentsMargins(0, -1, -1, -1)
         self.verticalLayout_7.setObjectName(_fromUtf8("verticalLayout_7"))
+        self.groupBox = QtGui.QGroupBox(self.tab_balance)
+        self.groupBox.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.groupBox.setObjectName(_fromUtf8("groupBox"))
+        self.horizontalLayout = QtGui.QHBoxLayout(self.groupBox)
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.verticalLayout_7.addWidget(self.groupBox)
         self.horizontalLayout_7.addLayout(self.verticalLayout_7)
         self.tblBalance = QtGui.QTableWidget(self.tab_balance)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Ignored)
@@ -167,6 +173,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Libra v1.0.0", None))
+        self.groupBox.setTitle(_translate("MainWindow", "Period", None))
         __sortingEnabled = self.tblBalance.isSortingEnabled()
         self.tblBalance.setSortingEnabled(False)
         item = self.tblBalance.item(0, 0)
