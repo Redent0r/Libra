@@ -112,6 +112,25 @@
                   </property>
                   <layout class="QHBoxLayout" name="horizontalLayout">
                    <item>
+                    <layout class="QFormLayout" name="formLayout">
+                     <property name="sizeConstraint">
+                      <enum>QLayout::SetDefaultConstraint</enum>
+                     </property>
+                     <property name="fieldGrowthPolicy">
+                      <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+                     </property>
+                     <property name="formAlignment">
+                      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                     </property>
+                     <property name="verticalSpacing">
+                      <number>6</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                    </layout>
+                   </item>
+                   <item>
                     <widget class="QCalendarWidget" name="calBalance">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -399,7 +418,18 @@
    </attribute>
    <addaction name="actionRefresh"/>
    <addaction name="separator"/>
+   <addaction name="actionPurchase"/>
+   <addaction name="separator"/>
   </widget>
+  <action name="actionPurchase">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/resources/plus-icon-0.png</normaloff>:/icons/resources/plus-icon-0.png</iconset>
+   </property>
+   <property name="text">
+    <string>Purchase</string>
+   </property>
+  </action>
   <action name="actionRefresh">
    <property name="icon">
     <iconset resource="res.qrc">
