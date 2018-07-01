@@ -38,6 +38,15 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         ### Actions functionality ###
         self.actionRefresh.triggered.connect(self.refreshTables)
 
+        self.radioHistoric.toggled.connect(lambda: self.set_balance(self.radioHistoric))
+        self.radioAnnual.toggled.connect(lambda: self.set_balance(self.radioAnnual))
+        self.radioMonthly.toggled.connect(lambda: self.set_balance(self.radioMonthly))
+        self.dateAnnual.dateChanged.connect(lambda: self.set_balance(self.radioAnnual))
+        self.dateMonthly.dateChanged.connect(lambda: self.set_balance(self.radioMonthly))
+
+        self.calBalance.selectionChanged.connect(self.calendar_changed)
+        self.calBalance.showToday()
+
         ### Creates tables if not exists, for mec_inventario ###
         self.conn = sqlite3.connect(self.DB_LOCATION)
         self.c = self.conn.cursor()
@@ -62,7 +71,9 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         end = time.time()
         print("refresh time: " + str(end - start))
-
+        
+    def calendar_changed(self):
+        pass
     def set_balance(self, radioButton):
         pass
 
