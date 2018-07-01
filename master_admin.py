@@ -43,6 +43,9 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.c = self.conn.cursor()
         mec_inventory.create_tables(self.conn, self.c)
 
+        self.set_balance(self.radioHistoric)
+        self.refreshTables()
+
         # bal stretch
         self.tblBalance.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tblBalance.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -59,6 +62,17 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         end = time.time()
         print("refresh time: " + str(end - start))
+
+    def set_balance(self, radioButton):
+        pass
+
+    def combo_box_changed(self, comboBox, proxy):
+
+        proxy.setFilterKeyColumn(comboBox.currentIndex())
+
+    def search(self, text, proxy):
+
+        proxy.setFilterRegExp("^" + text)
 
     def closeEvent(self,event):
 
