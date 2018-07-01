@@ -20,6 +20,45 @@ def create_tables(connection,cursor):
     return True
  
 #-------------------------------------------------------------------------------------------------------
+def calc_deb(cursor, date = None):
+    """
+        Calculates liquidity.
+    """
+    deb = []
+    if (date == None):
+        cursor.execute("SELECT priceItems FROM Outs WHERE payment = 'DEB'")
+        data = cursor.fetchall()
+        for e in data:
+            deb.append(e[0])
+    else:    
+        cursor.execute("SELECT priceItems,dat FROM Outs WHERE payment = 'DEB'")
+        data = cursor.fetchall()
+        for e in data:
+            if (date in e[1]):
+                deb.append(e[0])
+    deb = round(sum(deb),2)
+    return deb
+
+def calc_cre(cursor,date = None):
+    """
+        Calculates money customers currently owe.
+    """
+    cre = []
+    if (date == None):
+        cursor.execute("SELECT priceItems FROM Outs WHERE payment = 'CRE'")
+        data = cursor.fetchall()
+        for e in data:
+            cre.append(e[0])
+    else:    
+        cursor.execute("SELECT priceItems,dat FROM Outs WHERE payment = 'CRE'")
+        data = cursor.fetchall()
+        for e in data:
+            if (date in e[1]):
+                cre.append(e[0])
+    cre = round(sum(cre),2)
+    return cre
+ 
+#-------------------------------------------------------------------------------------------------------
 def print_(cursor,table):#Print any table.
     cursor.execute('SELECT * FROM '+ table)
     data = cursor.fetchall()
