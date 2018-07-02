@@ -10,6 +10,7 @@ from PyQt4 import QtCore, QtGui, QtSql
 
 ### GUIs ###
 from gui_inventory import Ui_MainWindow as InventoryGui
+from gui_purchase import Ui_Dialog as PurchaseGui
 
 import mec_inventory# stresstest
 
@@ -34,9 +35,19 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
          ### Table Models ###
         self.mdlInventory = QtSql.QSqlQueryModel()
+        # bal
+        self.mdlPurchasesBal = QtSql.QSqlQueryModel()
+
+        # bal
+        self.proxyPurchasesBal = QtGui.QSortFilterProxyModel()
+        self.proxyPurchasesBal.setSourceModel(self.mdlPurchasesBal)
+
+        # bal
+        self.proxyPurchasesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
 
         ### Actions functionality ###
         self.actionRefresh.triggered.connect(self.refreshTables)
+        self.actionPurchase.triggered.connect(self.action_purchase)
 
         self.radioHistoric.toggled.connect(lambda: self.set_balance(self.radioHistoric))
         self.radioAnnual.toggled.connect(lambda: self.set_balance(self.radioAnnual))
@@ -55,6 +66,11 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.set_balance(self.radioHistoric)
         self.refreshTables()
 
+        # headers bal
+        headers = ["Date", "Transaction", "Code", "Quantity", "Total Cost"]
+        for i in range(len(headers)):
+            self.mdlPurchasesBal.setHeaderData(i, QtCore.Qt.Horizontal, headers[i])
+
         # bal stretch
         self.tblBalance.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tblBalance.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -68,6 +84,10 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         self.mdlInventory.setQuery("""SELECT code, name, groupx, avail, costUni, priceUniSug,
                                    stockmin, stockmax, category FROM Inventory""", self.db)
+
+        # bal tables
+        self.mdlPurchasesBal.setQuery(""" SELECT dat, trans, code, quantity, costItems 
+                                                            FROM Entries """, self.db)
 
         end = time.time()
         print("refresh time: " + str(end - start))
@@ -85,6 +105,8 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         proxy.setFilterRegExp("^" + text)
 
+    def action_purchase(self):
+        pass
     def closeEvent(self,event):
 
         msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Warning",
@@ -104,6 +126,16 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         else:
             event.ignore()
 
+class Purchase(QtGui.QDialog, PurchaseGui):
+
+    def __init__ (self, parent=None):
+
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
+
+        ### connection, from parent #######
+        self.conn = self.parent().conn
+        self.c = self.parent().c
 ##################### starts everything #############################################
 if __name__ == "__main__":
 
