@@ -93,7 +93,29 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         print("refresh time: " + str(end - start))
         
     def calendar_changed(self):
-        pass
+
+        start = time.time()
+
+        self.radioDaily.setChecked(True)
+
+        date = str(self.calBalance.selectedDate().toPyDate())
+        self.search(date, self.proxyPurchasesBal)
+        items = mec_inventory.calc_bal_day(self.c, date[0:4], date[5:7], date[8:10])
+        self.tblBalance.setItem(0, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[2]))) # ventas contado
+        self.tblBalance.setItem(1, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[3]))) # ventas credito 
+        self.tblBalance.setItem(2, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[1]))) # ingreso tot
+        self.tblBalance.setItem(3, 1, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[0]))) # costo
+        self.tblBalance.setItem(4, 1, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[5]))) # impuesto
+        self.tblBalance.setItem(5, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[6]))) # ganancia
+        if items[0] != 0:
+            self.tblBalance.setItem(6, 2, QtGui.QTableWidgetItem('% {0:.2f}'.format(items[6]/items[0] * 100))) 
+        else:
+            self.tblBalance.setItem(6, 2, QtGui.QTableWidgetItem('% 0.00'))
+
+        end = time.time()
+
+        print("cal: " + str(end - start))
+
     def set_balance(self, radioButton):
         pass
 
@@ -106,7 +128,10 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         proxy.setFilterRegExp("^" + text)
 
     def action_purchase(self):
-        pass
+
+        purchase = Purchase(self)
+        purchase.show()
+
     def closeEvent(self,event):
 
         msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Warning",
