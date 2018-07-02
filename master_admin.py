@@ -10,7 +10,6 @@ from PyQt4 import QtCore, QtGui, QtSql
 
 ### GUIs ###
 from gui_inventory import Ui_MainWindow as InventoryGui
-from gui_purchase import Ui_Dialog as PurchaseGui
 
 import mec_inventory# stresstest
 
@@ -35,41 +34,14 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
          ### Table Models ###
         self.mdlInventory = QtSql.QSqlQueryModel()
-        # bal
-        self.mdlPurchasesBal = QtSql.QSqlQueryModel()
-
-        # bal
-        self.proxyPurchasesBal = QtGui.QSortFilterProxyModel()
-        self.proxyPurchasesBal.setSourceModel(self.mdlPurchasesBal)
-
-        # bal
-        self.proxyPurchasesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
 
         ### Actions functionality ###
         self.actionRefresh.triggered.connect(self.refreshTables)
-        self.actionPurchase.triggered.connect(self.action_purchase)
-
-        self.radioHistoric.toggled.connect(lambda: self.set_balance(self.radioHistoric))
-        self.radioAnnual.toggled.connect(lambda: self.set_balance(self.radioAnnual))
-        self.radioMonthly.toggled.connect(lambda: self.set_balance(self.radioMonthly))
-        self.dateAnnual.dateChanged.connect(lambda: self.set_balance(self.radioAnnual))
-        self.dateMonthly.dateChanged.connect(lambda: self.set_balance(self.radioMonthly))
-
-        self.calBalance.selectionChanged.connect(self.calendar_changed)
-        self.calBalance.showToday()
 
         ### Creates tables if not exists, for mec_inventario ###
         self.conn = sqlite3.connect(self.DB_LOCATION)
         self.c = self.conn.cursor()
         mec_inventory.create_tables(self.conn, self.c)
-
-        self.set_balance(self.radioHistoric)
-        self.refreshTables()
-
-        # headers bal
-        headers = ["Date", "Transaction", "Code", "Quantity", "Total Cost"]
-        for i in range(len(headers)):
-            self.mdlPurchasesBal.setHeaderData(i, QtCore.Qt.Horizontal, headers[i])
 
         # bal stretch
         self.tblBalance.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -85,52 +57,8 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.mdlInventory.setQuery("""SELECT code, name, groupx, avail, costUni, priceUniSug,
                                    stockmin, stockmax, category FROM Inventory""", self.db)
 
-        # bal tables
-        self.mdlPurchasesBal.setQuery(""" SELECT dat, trans, code, quantity, costItems 
-                                                            FROM Entries """, self.db)
-
         end = time.time()
         print("refresh time: " + str(end - start))
-        
-    def calendar_changed(self):
-
-        start = time.time()
-
-        self.radioDaily.setChecked(True)
-
-        date = str(self.calBalance.selectedDate().toPyDate())
-        self.search(date, self.proxyPurchasesBal)
-        items = mec_inventory.calc_bal_day(self.c, date[0:4], date[5:7], date[8:10])
-        self.tblBalance.setItem(0, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[2]))) # ventas contado
-        self.tblBalance.setItem(1, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[3]))) # ventas credito 
-        self.tblBalance.setItem(2, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[1]))) # ingreso tot
-        self.tblBalance.setItem(3, 1, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[0]))) # costo
-        self.tblBalance.setItem(4, 1, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[5]))) # impuesto
-        self.tblBalance.setItem(5, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[6]))) # ganancia
-        if items[0] != 0:
-            self.tblBalance.setItem(6, 2, QtGui.QTableWidgetItem('% {0:.2f}'.format(items[6]/items[0] * 100))) 
-        else:
-            self.tblBalance.setItem(6, 2, QtGui.QTableWidgetItem('% 0.00'))
-
-        end = time.time()
-
-        print("cal: " + str(end - start))
-
-    def set_balance(self, radioButton):
-        pass
-
-    def combo_box_changed(self, comboBox, proxy):
-
-        proxy.setFilterKeyColumn(comboBox.currentIndex())
-
-    def search(self, text, proxy):
-
-        proxy.setFilterRegExp("^" + text)
-
-    def action_purchase(self):
-
-        purchase = Purchase(self)
-        purchase.show()
 
     def closeEvent(self,event):
 
@@ -151,16 +79,6 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         else:
             event.ignore()
 
-class Purchase(QtGui.QDialog, PurchaseGui):
-
-    def __init__ (self, parent=None):
-
-        QtGui.QDialog.__init__(self, parent)
-        self.setupUi(self)
-
-        ### connection, from parent #######
-        self.conn = self.parent().conn
-        self.c = self.parent().c
 ##################### starts everything #############################################
 if __name__ == "__main__":
 
