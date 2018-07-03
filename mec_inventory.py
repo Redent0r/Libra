@@ -20,6 +20,93 @@ def create_tables(connection,cursor):
     return True
  
 #-------------------------------------------------------------------------------------------------------
+def calc_bal_day(cursor,year,month,day):
+
+    if (len(year) != 4) or (int(year) < 2016) or (int(year)> 3000) or (isinstance(year,float)) or (len(month) != 2)  or (isinstance(month,float)) or (int(month)< 0) or (int(month)>12) or (int(day) > 31) or (len(day) != 2):
+        print('Bad date')
+        return False
+    date = year+'-'+ month + '-' + day
+    
+    entries = []
+    cursor.execute('SELECT dat,costItems FROM Entries')
+    data = cursor.fetchall()
+    for row in data:
+        if (date in row[0]):
+            entries.append(row[1])
+    costTot = sum(entries)
+
+    cursor.execute('SELECT dat,priceItems,revenue,tax,winnings FROM Outs ')
+    query = cursor.fetchall()
+    #-------------------------------------------------------------------------------------------------------
+    p = []
+    for e in query:
+        if (date in e[0]):
+            p.append(e[1])
+    priceTot = sum(p)
+    #-------------------------------------------------------------------------------------------------------
+    g = []
+    for d in query:
+        if (date in d[0]):
+            g.append(d[2])
+    revenueTot = sum(g)
+    #-------------------------------------------------------------------------------------------------------
+    i = []
+    for elem in query:
+        if (date in elem[0]):
+            i.append(elem[3])
+    taxTot = sum(i)
+    #-------------------------------------------------------------------------------------------------------
+    x = []
+    for al in query:
+        if(date in al[0]):
+            x.append(al[4])
+    winningsTot = sum(x)
+    #-------------------------------------------------------------------------------------------------------
+    cd = calc_deb(cursor,date)
+    cc = calc_cre(cursor,date)
+
+ 
+    return [costTot,priceTot,cd,cc,round((priceTot - costTot),2),taxTot,round((priceTot - costTot - taxTot),2)]
+#-------------------------------------------------------------------------------------------------------
+def calc_deb(cursor, date = None):
+    """
+        Calculates liquidity.
+    """
+    deb = []
+    if (date == None):
+        cursor.execute("SELECT priceItems FROM Outs WHERE payment = 'DEB'")
+        data = cursor.fetchall()
+        for e in data:
+            deb.append(e[0])
+    else:    
+        cursor.execute("SELECT priceItems,dat FROM Outs WHERE payment = 'DEB'")
+        data = cursor.fetchall()
+        for e in data:
+            if (date in e[1]):
+                deb.append(e[0])
+    deb = round(sum(deb),2)
+    return deb
+
+def calc_cre(cursor,date = None):
+    """
+        Calculates money customers currently owe.
+    """
+    cre = []
+    if (date == None):
+        cursor.execute("SELECT priceItems FROM Outs WHERE payment = 'CRE'")
+        data = cursor.fetchall()
+        for e in data:
+            cre.append(e[0])
+    else:    
+        cursor.execute("SELECT priceItems,dat FROM Outs WHERE payment = 'CRE'")
+        data = cursor.fetchall()
+        for e in data:
+            if (date in e[1]):
+                cre.append(e[0])
+    cre = round(sum(cre),2)
+    return cre
+ 
+#-------------------------------------------------------------------------------------------------------
 def print_(cursor,table):#Print any table.
     cursor.execute('SELECT * FROM '+ table)
     data = cursor.fetchall()
