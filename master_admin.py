@@ -117,7 +117,46 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         print("cal: " + str(end - start))
 
     def set_balance(self, radioButton):
-        pass
+
+        start = time.time()
+
+        if radioButton.isChecked():
+            items = []
+            if radioButton == self.radioHistoric:
+
+                self.search("", self.proxyPurchasesBal)
+
+                items = mec_inventory.calc_bal_his(self.c)
+                # [costoTot,precioTot,cd,cc,ingresoTot,impuestoTot,gananciaTot]
+
+            elif radioButton == self.radioAnnual:
+
+                date = str(self.dateAnnual.date().toPyDate())
+                self.search(date[0:4], self.proxyPurchasesBal)
+                items = mec_inventory.calc_bal_year(self.c, date[0:4])
+                # [costoTot,precioTot,cd,cc,ingresoTot,impuestoTot,gananciaTot]
+
+            else: # radio mensual
+
+                date = str(self.dateMonthly.date().toPyDate())
+                self.search((date[0:4] + "-" + date[5:7]), self.proxyPurchasesBal)
+                items = mec_inventory.calc_bal_mes(self.c, date[0:4], date[5:7])
+                # [costoTot,precioTot,cd,cc,ingresoTot,impuestoTot,gananciaTot]
+
+            self.tblBalance.setItem(0, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[2])))
+            self.tblBalance.setItem(1, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[3])))
+            self.tblBalance.setItem(2, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[1])))
+            self.tblBalance.setItem(3, 1, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[0])))
+            self.tblBalance.setItem(4, 1, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[5])))
+            self.tblBalance.setItem(5, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[6])))
+            if items[0] != 0:
+                self.tblBalance.setItem(6, 2, QtGui.QTableWidgetItem('% {0:.2f}'.format(items[6]/items[0] * 100)))
+            else:
+                self.tblBalance.setItem(6, 2, QtGui.QTableWidgetItem('% 0.00'))
+
+        end = time.time()
+
+        print("bal: " + str(end - start))
 
     def combo_box_changed(self, comboBox, proxy):
 
