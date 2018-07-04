@@ -20,6 +20,142 @@ def create_tables(connection,cursor):
     return True
  
 #-------------------------------------------------------------------------------------------------------
+def calc_bal_his(cursor):
+    """
+        CalcuLates balances of all exits and entries ever and adds them to the historic balance db.
+    """
+    t = []
+    cursor.execute('SELECT costItems FROM Entries')
+    data = cursor.fetchall()
+    for row0 in data:
+        t.append(row0[0])
+    costTot = sum(t)
+
+    cursor.execute('SELECT priceItems,revenue,tax,winnings FROM Outs')
+    query = cursor.fetchall()
+    
+    #-------------------------------------------------------------------------------------------------------
+
+    p = []
+    for row2 in query:
+        p.append(row2[0])
+    priceTot = sum(p)
+    #-------------------------------------------------------------------------------------------------------
+    g = []
+    for row3 in query:
+        g.append(row3[1])
+    revenueTot = sum(g)
+    #-------------------------------------------------------------------------------------------------------
+    i = []
+    for row4 in query:
+        i.append(row4[2])
+    taxTot = sum(i)
+    #-------------------------------------------------------------------------------------------------------
+    x = []
+    for row5 in query:
+        x.append(row5[3])
+    winningsTot = sum(x)
+    #-------------------------------------------------------------------------------------------------------
+    cd = calc_deb(cursor)
+    cc = calc_cre(cursor)   
+
+    return [costTot,priceTot,cd,cc,round((priceTot - costTot),2),taxTot,round((priceTot - costTot - taxTot),2)]
+ 
+def calc_bal_mes(cursor,year,month):
+
+    if (len(year) != 4) or (int(year) < 2016) or (int(year)> 3000) or (isinstance(year,float)) or (len(month) != 2)  or (isinstance(month,float)) or (int(month)< 0) or (int(month)>12) :
+        print('Bad date')
+        return False
+    date = year+'-'+ month
+    entries = []
+
+    #-------------------------------------------------------------------------------------------------------
+    cursor.execute('SELECT dat,costItems FROM Entries')
+    data = cursor.fetchall()
+    for row in data:
+        if (date in row[0]):
+            entries.append(row[1])
+    costTot = sum(entries)
+
+    cursor.execute('SELECT dat,priceItems,revenue,tax,winnings FROM Outs ')
+    query = cursor.fetchall()
+    #-------------------------------------------------------------------------------------------------------
+    p = []
+    for e in query:
+        if (date in e[0]):
+            p.append(e[1])
+    priceTot = sum(p)
+    #-------------------------------------------------------------------------------------------------------
+    g = []
+    for d in query:
+        if (date in d[0]):
+            g.append(d[2])
+    revenueTot = sum(g)
+    #-------------------------------------------------------------------------------------------------------
+    i = []
+    for elem in query:
+        if (date in elem[0]):
+            i.append(elem[3])
+    taxTot = sum(i)
+    #-------------------------------------------------------------------------------------------------------
+    x = []
+    for al in query:
+        if(date in al[0]):
+            x.append(al[4])
+    winningsTot = sum(x)
+    #-------------------------------------------------------------------------------------------------------
+    cd = calc_deb(cursor,date)
+    cc = calc_cre(cursor,date)
+ 
+    return [costTot,priceTot,cd,cc,round((priceTot - costTot),2),taxTot,round((priceTot - costTot - taxTot),2)]
+      
+def calc_bal_year(cursor,year):
+
+    if (len(year) != 4) or (int(year) < 2016) or (int(year)> 3000) or (isinstance(year,float)) :
+        print('Not proper date.')
+        return False
+    date = year 
+    entries = []
+     #-------------------------------------------------------------------------------------------------------
+    cursor.execute('SELECT dat,costItems FROM Entries')
+    data = cursor.fetchall()
+    for row in data:
+        if (date in row[0]):
+            entries.append(row[1])
+    costTot = sum(entries)
+
+    cursor.execute('SELECT dat,priceItems,revenue,tax,winnings FROM Outs ')
+    query = cursor.fetchall()
+    #-------------------------------------------------------------------------------------------------------
+    p = []
+    for e in query:
+        if (date in e[0]):
+            p.append(e[1])
+    priceTot = sum(p)
+    #-------------------------------------------------------------------------------------------------------
+    g = []
+    for d in query:
+        if (date in d[0]):
+            g.append(d[2])
+    revenueTot = sum(g)
+    #-------------------------------------------------------------------------------------------------------
+    i = []
+    for elem in query:
+        if (date in elem[0]):
+            i.append(elem[3])
+    taxTot = sum(i)
+    #-------------------------------------------------------------------------------------------------------
+    x = []
+    for al in query:
+        if(date in al[0]):
+            x.append(al[4])
+    winningsTot = sum(x)
+    #-------------------------------------------------------------------------------------------------------
+    cd = calc_deb(cursor,date)
+    cc = calc_cre(cursor,date)
+ 
+    return [costTot,priceTot,cd,cc,round((priceTot - costTot),2),taxTot,round((priceTot - costTot - taxTot),2)]
+
 def calc_bal_day(cursor,year,month,day):
 
     if (len(year) != 4) or (int(year) < 2016) or (int(year)> 3000) or (isinstance(year,float)) or (len(month) != 2)  or (isinstance(month,float)) or (int(month)< 0) or (int(month)>12) or (int(day) > 31) or (len(day) != 2):
