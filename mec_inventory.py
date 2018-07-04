@@ -243,6 +243,18 @@ def calc_cre(cursor,date = None):
     return cre
  
 #-------------------------------------------------------------------------------------------------------
+def unique(cursor,column,table,key_column = "",key = ""):
+    if key_column == "":
+        cursor.execute("SELECT DISTINCT "+ column + " FROM " + table)
+    else:
+        cursor.execute("SELECT DISTINCT " + column + " FROM " + table + " WHERE " + key_column + " = ?",(key,))
+    unique_values = []
+    data = cursor.fetchall()
+    if data != None:
+        for line in data:
+            unique_values.append(line[0])
+    return unique_values
+#-------------------------------------------------------------------------------------------------------
 def print_(cursor,table):#Print any table.
     cursor.execute('SELECT * FROM '+ table)
     data = cursor.fetchall()
