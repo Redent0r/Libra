@@ -158,6 +158,18 @@ class Ui_Dialog(object):
         self.cmboxGroup.setObjectName(_fromUtf8("cmboxGroup"))
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.cmboxGroup)
         self.verticalLayout.addLayout(self.formLayout)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        self.btnAdd = QtGui.QPushButton(Dialog)
+        self.btnAdd.setAutoDefault(False)
+        self.btnAdd.setDefault(False)
+        self.btnAdd.setObjectName(_fromUtf8("btnAdd"))
+        self.horizontalLayout.addWidget(self.btnAdd)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem1)
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -180,5 +192,6 @@ class Ui_Dialog(object):
         self.spnboxMargin.setPrefix(_translate("Dialog", "% ", None))
         self.spnboxPrice.setPrefix(_translate("Dialog", "$ ", None))
         self.label_11.setText(_translate("Dialog", "Group:", None))
+        self.btnAdd.setText(_translate("Dialog", "Add", None))
 
 import res_rc
