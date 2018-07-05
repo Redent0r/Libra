@@ -202,9 +202,33 @@ class Purchase(QtGui.QDialog, PurchaseGui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
 
+        self.spnboxMargin.valueChanged.connect(self.margin_changed)
+        self.spnboxPrice.valueChanged.connect(self.price_changed)
+        self.spnboxCost.valueChanged.connect(self.cost_changed)
+
         ### connection, from parent #######
         self.conn = self.parent().conn
         self.c = self.parent().c
+
+        ### combo box categoria config
+        self.cmboxCategory.addItems(mec_inventory.unique(self.c, "category", "Inventory"))
+        self.cmboxCategory.completer().setCompletionMode(QtGui.QCompleter.PopupCompletion)
+
+        ### code combo box ###
+        self.cmBoxCode.addItems(mec_inventory.unique(self.c, "code", "Inventory"))
+        self.cmBoxCode.completer().setCompletionMode(QtGui.QCompleter.PopupCompletion)
+        self.cmBoxCode.setEditText("")
+
+        self.code = "" # controlling multiple code input
+
+    def cost_changed(self):
+        pass
+
+    def price_changed(self):
+        pass
+
+    def margin_changed(self):
+        pass
 ##################### starts everything #############################################
 if __name__ == "__main__":
 
