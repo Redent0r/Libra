@@ -202,6 +202,9 @@ class Purchase(QtGui.QDialog, PurchaseGui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
 
+        ### functionality ###
+        self.btnAdd.clicked.connect(self.add)
+
         self.spnboxMargin.valueChanged.connect(self.margin_changed)
         self.spnboxPrice.valueChanged.connect(self.price_changed)
         self.spnboxCost.valueChanged.connect(self.cost_changed)
@@ -229,6 +232,10 @@ class Purchase(QtGui.QDialog, PurchaseGui):
 
     def margin_changed(self):
         pass
+
+    def add(self):
+        pass
+
 ##################### starts everything #############################################
 if __name__ == "__main__":
 
