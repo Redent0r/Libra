@@ -264,6 +264,10 @@ def unique(cursor,column,table,key_column = "",key = ""):
             unique_values.append(line[0])
     return unique_values
 #-------------------------------------------------------------------------------------------------------
+def update_all(cursor,code,groupx,cost,price,name,category):
+    t = (name,price,cost,category,code,groupx)
+    cursor.execute('UPDATE Inventory SET name = ?,priceUniSug = ?,costUni = ?,category = ? WHERE code = ? AND groupx = ?',t)
+     
 def increase_stock(cursor,code,groupx,quantity):
     cursor.execute('SELECT avail FROM Inventory WHERE code = ? AND groupx = ?',(code,groupx))
     data = cursor.fetchone()
