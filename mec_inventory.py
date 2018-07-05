@@ -20,6 +20,15 @@ def create_tables(connection,cursor):
     return True
  
 #-------------------------------------------------------------------------------------------------------
+
+def query_add(cursor,code,groupx):
+    cursor.execute('SELECT name,costUni,priceUniSug,category,stockmin,stockmax FROM Inventory WHERE code = ? AND groupx = ?',(code,groupx))
+    data = cursor.fetchone()
+    if (data == None):
+        return False
+    return data
+
+#-------------------------------------------------------------------------------------------------------
 def calc_bal_his(cursor):
     """
         CalcuLates balances of all exits and entries ever and adds them to the historic balance db.
@@ -255,6 +264,13 @@ def unique(cursor,column,table,key_column = "",key = ""):
             unique_values.append(line[0])
     return unique_values
 #-------------------------------------------------------------------------------------------------------
+def increase_stock(cursor,code,groupx,quantity):
+    cursor.execute('SELECT avail FROM Inventory WHERE code = ? AND groupx = ?',(code,groupx))
+    data = cursor.fetchone()
+    avail = int(data[0]) + quantity
+    cursor.execute('UPDATE Inventory SET avail = ? WHERE code = ? AND groupx = ?',(avail,code,groupx))
+    return True
+
 def print_(cursor,table):#Print any table.
     cursor.execute('SELECT * FROM '+ table)
     data = cursor.fetchall()
