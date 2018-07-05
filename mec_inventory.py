@@ -19,6 +19,38 @@ def create_tables(connection,cursor):
     connection.commit()
     return True
  
+def add_item_entry(connection,cursor,code = '#',name = "",quantity = 0,provider = "",costUni = 0.00,priceUniSug = 100 ,groupx = '',category = "",stockmin = "",stockmax = ""):
+    """
+        This function adds entries to the table Inventory and Entries.
+    """
+    cursor.execute('SELECT code,groupx FROM Inventory WHERE code=? AND groupx = ?',(code,groupx))
+    data = cursor.fetchone()
+    if data == None:
+        transnum = ordinal_generator(connection,cursor)
+        avail = quantity
+        costItems = costUni * quantity
+        costItems = round(costItems,2)
+        priceUniSug = round(priceUniSug,2)
+        costUni = round(costUni,2)
+        b = (code,name,avail,costUni,priceUniSug,groupx,category,stockmin,stockmax)
+        c = (transnum,code,name,quantity,provider,costUni,costItems,groupx,category)
+        cursor.execute("INSERT INTO Inventory (code,name,avail,costUni,priceUniSug,groupx,category,stockmin,stockmax) VALUES(?,?,?,?,?,?,?,?,?)",b)
+        cursor.execute("INSERT INTO Entries (dat,trans,code,name,quantity,provider,costUni,costItems,groupx,category) VALUES(date('now'),?,?,?,?,?,?,?,?,?)",c)
+        connection.commit()
+    else:         
+        transnum = ordinal_generator(connection,cursor)
+        avail = quantity
+        costItems = costUni * quantity
+        costItems = round(costItems,2)
+        c = (transnum,code,name,quantity,provider,round(costUni,2),costItems,groupx,category)
+    #-------------------------------------------------------------------------------------------------------
+        increase_stock(cursor,code,groupx,quantity)
+        update_all(cursor,code,groupx,costUni,priceUniSug,name,category) 
+    #-------------------------------------------------------------------------------------------------------
+        cursor.execute("INSERT INTO Entries (dat,trans,code,name,quantity,provider,costUni,costItems,groupx,category) VALUES(date('now'),?,?,?,?,?,?,?,?,?)",c)
+        connection.commit()
+    return True
+
 #-------------------------------------------------------------------------------------------------------
 
 def query_add(cursor,code,groupx):
@@ -264,6 +296,28 @@ def unique(cursor,column,table,key_column = "",key = ""):
             unique_values.append(line[0])
     return unique_values
 #-------------------------------------------------------------------------------------------------------
+ 
+def ordinal_generator(connection,cursor):
+    """
+        Generates string numbers starting with 1 and makes sure to never
+        have used them before.It also adds them complementary 0's until it 
+        has a minimum length of 8 characters.
+    """
+    exists = False
+    trans = ""
+
+    cursor.execute('SELECT MAX(ID) FROM OrdinalNumber')
+    index = cursor.fetchone()
+    if (index[0] == None):
+        trans = '00000000'
+    else:
+        index = str(index[0])
+        trans = index.zfill(8)
+    d = ('a',)
+    cursor.execute('INSERT INTO OrdinalNumber(num) VALUES (?)',d)
+    connection.commit()
+    return ('1' + trans)
+
 def update_all(cursor,code,groupx,cost,price,name,category):
     t = (name,price,cost,category,code,groupx)
     cursor.execute('UPDATE Inventory SET name = ?,priceUniSug = ?,costUni = ?,category = ? WHERE code = ? AND groupx = ?',t)

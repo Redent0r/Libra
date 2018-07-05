@@ -235,7 +235,7 @@ class Purchase(QtGui.QDialog, PurchaseGui):
 
     def add(self):
         pass
-
+        
 ##################### starts everything #############################################
 if __name__ == "__main__":
 
