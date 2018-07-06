@@ -11,6 +11,7 @@ from PyQt4 import QtCore, QtGui, QtSql
 ### GUIs ###
 from gui_inventory import Ui_MainWindow as InventoryGui
 from gui_purchase import Ui_Dialog as PurchaseGui
+from gui_sale import Ui_Dialog as SaleGui
 
 import mec_inventory# stresstest
 
@@ -37,14 +38,17 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.mdlInventory = QtSql.QSqlQueryModel()
         # bal
         self.mdlPurchasesBal = QtSql.QSqlQueryModel()
-
+        self.mdlSalesBal = QtSql.QSqlQueryModel()
 
         # bal
         self.proxyPurchasesBal = QtGui.QSortFilterProxyModel()
         self.proxyPurchasesBal.setSourceModel(self.mdlPurchasesBal)
+        self.proxySalesBal = QtGui.QSortFilterProxyModel()
+        self.proxySalesBal.setSourceModel(self.mdlSalesBal)
 
         # bal
         self.proxyPurchasesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.proxySalesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
 
         # bal
         self.tblPurchasesBal.setModel(self.proxyPurchasesBal)
@@ -52,6 +56,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         ### Actions functionality ###
         self.actionRefresh.triggered.connect(self.refreshTables)
         self.actionPurchase.triggered.connect(self.action_purchase)
+        self.actionSale.triggered.connect(self.action_sale)
 
         self.radioHistoric.toggled.connect(lambda: self.set_balance(self.radioHistoric))
         self.radioAnnual.toggled.connect(lambda: self.set_balance(self.radioAnnual))
@@ -75,6 +80,10 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         for i in range(len(headers)):
             self.mdlPurchasesBal.setHeaderData(i, QtCore.Qt.Horizontal, headers[i])
 
+        headers = ["Date", "Transaction", "Code", "Quantity", "Total Price"]
+        for i in range(len(headers)):
+            self.mdlSalesBal.setHeaderData(i, QtCore.Qt.Horizontal, headers[i])
+
         # bal stretch
         self.tblBalance.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tblBalance.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -95,6 +104,10 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.mdlPurchasesBal.setQuery(""" SELECT dat, trans, code, quantity, costItems 
                                                             FROM Entries """, self.db)
 
+        self.mdlSalesBal.setQuery("""SELECT dat, trans, code, quantity,
+                                priceItems FROM Outs""", self.db)
+
+
         end = time.time()
         print("refresh time: " + str(end - start))
         
@@ -106,6 +119,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         date = str(self.calBalance.selectedDate().toPyDate())
         self.search(date, self.proxyPurchasesBal)
+        self.search(date, self.proxySalesBal)
         items = mec_inventory.calc_bal_day(self.c, date[0:4], date[5:7], date[8:10])
         self.tblBalance.setItem(0, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[2]))) # ventas contado
         self.tblBalance.setItem(1, 2, QtGui.QTableWidgetItem('$ {0:.2f}'.format(items[3]))) # ventas credito 
@@ -131,7 +145,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
             if radioButton == self.radioHistoric:
 
                 self.search("", self.proxyPurchasesBal)
-
+                self.search("", self.proxySalesBal)
                 items = mec_inventory.calc_bal_his(self.c)
                 # [costoTot,precioTot,cd,cc,ingresoTot,impuestoTot,gananciaTot]
 
@@ -139,6 +153,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
                 date = str(self.dateAnnual.date().toPyDate())
                 self.search(date[0:4], self.proxyPurchasesBal)
+                self.search(date[0:4], self.proxySalesBal)
                 items = mec_inventory.calc_bal_year(self.c, date[0:4])
                 # [costoTot,precioTot,cd,cc,ingresoTot,impuestoTot,gananciaTot]
 
@@ -146,6 +161,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
                 date = str(self.dateMonthly.date().toPyDate())
                 self.search((date[0:4] + "-" + date[5:7]), self.proxyPurchasesBal)
+                self.search((date[0:4] + "-" + date[5:7]), self.proxySalesBal)
                 items = mec_inventory.calc_bal_mes(self.c, date[0:4], date[5:7])
                 # [costoTot,precioTot,cd,cc,ingresoTot,impuestoTot,gananciaTot]
 
@@ -171,6 +187,12 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
     def search(self, text, proxy):
 
         proxy.setFilterRegExp("^" + text)
+
+
+    def action_sale(self):
+
+        sale = Sale(self)
+        sale.show()
 
     def action_purchase(self):
 
@@ -352,6 +374,13 @@ class Purchase(QtGui.QDialog, PurchaseGui):
         else: # nombre == ""
             QtGui.QMessageBox.warning(self, 'Warning', 'Please enter a name')
 
+
+class Sale(QtGui.QDialog, SaleGui):
+
+    def __init__(self, parent=None):
+
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
 
 
 ##################### starts everything #############################################
