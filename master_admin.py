@@ -52,6 +52,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         # bal
         self.tblPurchasesBal.setModel(self.proxyPurchasesBal)
+        self.tblSalesBal.setModel(self.proxySalesBal)
 
         ### Actions functionality ###
         self.actionRefresh.triggered.connect(self.refreshTables)
@@ -88,7 +89,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.tblBalance.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tblBalance.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tblPurchasesBal.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
-
+        self.tblSalesBal.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
 
         end = time.time()
         print("constructor time: " + str(end - start))
