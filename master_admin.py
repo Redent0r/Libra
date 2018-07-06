@@ -383,7 +383,7 @@ class Sale(QtGui.QDialog, SaleGui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
 
-
+    
 ##################### starts everything #############################################
 if __name__ == "__main__":
 

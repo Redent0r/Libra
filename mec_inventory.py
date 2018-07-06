@@ -52,7 +52,92 @@ def add_item_entry(connection,cursor,code = '#',name = "",quantity = 0,provider 
         connection.commit()
     return True
 
+def add_item_exit_fixed(connection,cursor,code = "#",quantity = 1,tax = 0.07,pricef = 10.00,discount = 0,payment = 'CRE',client = '',trans='',groupx = ''):
+     
+    a =(code,groupx)
+    cursor.execute('SELECT name FROM Inventory WHERE code = ? AND groupx = ?',a)
+    data0 = cursor.fetchone()
+    name = str(data0[0])
+    decrease_stock(cursor,code,groupx,quantity)
+    priceUni = pricef
+    taxTot = tax * priceUni * quantity
+    taxTot = round(taxTot,2)
+    priceItems = priceUni * (tax + 1) * quantity
+    if (discount == 0):
+        priceItems = round(priceItems,2)
+    else:
+        discount = priceItems * discount
+        priceItems = priceItems - discount
+        priceItems = round(priceItems,2)
+    cursor.execute('SELECT costUni FROM Inventory WHERE code = ? AND groupx = ?',a)
+    data2 = cursor.fetchone()
+    costItems = (float(data2[0]))* quantity
+    costItems = round(costItems,2)
+    revenue = priceItems - costItems 
+    revenue = round(revenue,2)
+    winnings = revenue - taxTot
+    winnings = round(winnings,2)
+
+    auto_del_0(connection,cursor)
+    
+    b = (trans,code,name,quantity,groupx,priceUni,priceItems,taxTot,revenue,winnings,payment,client)
+    cursor.execute("INSERT INTO Outs (dat,trans,code,name,quantity,groupx,priceUni,priceItems,tax,revenue,winnings,payment,client) VALUES(date('now'),?,?,?,?,?,?,?,?,?,?,?,?)",b)
+    update_client_info(connection,cursor,client)
+    connection.commit()
+    #-------------------------------------------------------------------------------------------------------
+    return True
 #-------------------------------------------------------------------------------------------------------
+
+   
+
+def shopping_cart(connection,cursor,lista):
+    """
+    This function does multiple sales.lista is a list of lists.
+    The elements should contain the following arguments. : [code,quantity,tax,pricef,discount,payment,client,groupx]
+    """
+    counter = 0
+    results =[]
+    failed = {}
+    for e in lista:
+        a = sale_valid2(cursor,e[0],e[1],e[7])
+        results.append(a)
+    for el in range(len(results)):
+        if (results[el] != 0):
+            failed.setdefault((el+1),results[el])
+         
+    if (len(failed) > 0):
+        print(failed)
+        return failed
+    t = ordinal_generator2(connection,cursor)    
+    for e in lista:
+        counter += 1
+        transa = t + (str(counter).zfill(3))
+        add_item_exit_fixed(connection,cursor,e[0],e[1],e[2],e[3],e[4],e[5],e[6],transa,e[7])
+ 
+    return True
+ 
+
+def sale_valid2(cursor,code,quantity,groupx):
+    """
+    Checks If client ,quantity, or code exists.
+    0 = Sucessful
+    1 = does not exists. 2 = reduces below existing units ,
+ 
+    """    
+    l = []
+    a = (code,groupx)
+    cursor.execute('SELECT code,avail FROM Inventory WHERE code = ? AND groupx = ?',a)
+    data0 = cursor.fetchone()
+    if (data0 == None):
+        l.append(1)
+    if (data0 != None):
+        if (data0[1] < quantity):
+            l.append(2)
+    
+    if (len(l) == 0):
+        l = 0
+ 
+    return l
 
 def query_add(cursor,code,groupx):
     cursor.execute('SELECT name,costUni,priceUniSug,category,stockmin,stockmax FROM Inventory WHERE code = ? AND groupx = ?',(code,groupx))
@@ -60,6 +145,19 @@ def query_add(cursor,code,groupx):
     if (data == None):
         return False
     return data
+
+def query_sale(cursor,code,groupx):
+    """
+        Returns list with [name,priceUniSug,costUni]
+    """
+    cursor.execute('SELECT name,priceUniSug,costUni FROM Inventory WHERE code = ? AND groupx = ?',(code,groupx))
+    data = cursor.fetchone()
+    if (data == None):
+        print('No name with that code')
+        return False
+
+    return data 
+
 
 #-------------------------------------------------------------------------------------------------------
 def calc_bal_his(cursor):
