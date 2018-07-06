@@ -39,7 +39,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.mdlPurchasesBal = QtSql.QSqlQueryModel()
 
         # bal
-        self.proxyPurchasesBal = QtGui.QSortFilterProxyModel()
+        self.prox=yPurchasesBal = QtGui.QSortFilterProxyModel()
         self.proxyPurchasesBal.setSourceModel(self.mdlPurchasesBal)
 
         # bal
@@ -204,6 +204,7 @@ class Purchase(QtGui.QDialog, PurchaseGui):
 
         ### functionality ###
         self.btnAdd.clicked.connect(self.add)
+        self.btnUndo.clicked.connect(self.undo)
 
         self.spnboxMargin.valueChanged.connect(self.margin_changed)
         self.spnboxPrice.valueChanged.connect(self.price_changed)
@@ -221,20 +222,33 @@ class Purchase(QtGui.QDialog, PurchaseGui):
         self.cmBoxCode.addItems(mec_inventory.unique(self.c, "code", "Inventory"))
         self.cmBoxCode.completer().setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.cmBoxCode.setEditText("")
-        self.cmBoxCode.activated.connect(self.code_return)
 
+        self.cmBoxCode.activated.connect(self.code_return)
         self.cmboxGroup.activated.connect(self.group_return)
 
         self.code = "" # controlling multiple code input
 
     def cost_changed(self):
-        pass
+
+        self.spnboxMargin.setValue(0)
+        self.spnboxPrice.setValue(0)
 
     def price_changed(self):
-        pass
+
+        cost = self.spnboxCost.value()
+        if cost > 0:
+            price = self.spnboxPrice.value()
+            margin = (price/cost - 1) * 100
+
+            self.spnboxMargin.setValue(margin)
 
     def margin_changed(self):
-        pass
+
+        margin = self.spnboxMargin.value()
+        cost = self.spnboxCost.value()
+        price = cost * (1 + margin/100)
+
+        self.spnboxPrice.setValue(price)
 
     def code_return(self):
 
@@ -266,6 +280,20 @@ class Purchase(QtGui.QDialog, PurchaseGui):
         else:
             QtGui.QMessageBox.information(self, 'Message', ' No previous records of this code have\n'+
                                                                 'been found. New records will be created.')
+            
+    def undo(self):
+
+        self.leditName.clear()
+        self.spnboxCost.setValue(0)
+        self.spnBoxQuantity.setValue(1)
+        self.spnboxMargin.setValue(0)
+        self.spnboxPrice.setValue(0)
+        self.cmboxCategory.clearEditText()
+        self.cmboxGroup.clearEditText()
+        self.leditVendor.clear()
+        self.spnBoxMin.setValue(1)
+        self.spnBoxMax.setValue(100)
+        self.cmBoxCode.clearEditText()
 
     def add(self):
 
@@ -304,6 +332,7 @@ class Purchase(QtGui.QDialog, PurchaseGui):
                 if succesful:
 
                     self.parent().refreshTables()
+                    self.undo() # this has to go after refresh
                     QtGui.QMessageBox.information(self, 'Message', 'This purchase has been\n'+
                                                                         'regstered successfully')
 
