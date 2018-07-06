@@ -328,6 +328,16 @@ Si ya existe un registro del item, los campos se llenaran</string>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="btnUndo">
+       <property name="text">
+        <string>Undo</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

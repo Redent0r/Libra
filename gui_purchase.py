@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'gui_purchase.ui'
+# Form implementation generated from reading ui file 'gui_compra.ui'
 #
 # Created by: PyQt4 UI code generator 4.12.1
 #
@@ -167,6 +167,10 @@ class Ui_Dialog(object):
         self.btnAdd.setDefault(False)
         self.btnAdd.setObjectName(_fromUtf8("btnAdd"))
         self.horizontalLayout.addWidget(self.btnAdd)
+        self.btnUndo = QtGui.QPushButton(Dialog)
+        self.btnUndo.setAutoDefault(False)
+        self.btnUndo.setObjectName(_fromUtf8("btnUndo"))
+        self.horizontalLayout.addWidget(self.btnUndo)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -176,8 +180,8 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(_translate("Dialog", "Purchase", None))
-        Dialog.setWhatsThis(_translate("Dialog", "Introduzca un código y presione Enter.\n"
-"Si ya existe un registro del item, los campos se llenaran", None))
+        Dialog.setWhatsThis(_translate("Dialog", "Write a code and press ENTER.\n"
+"the fields will fill out automatically if this code was recorded previously", None))
         self.label.setText(_translate("Dialog", "Code:", None))
         self.label_2.setText(_translate("Dialog", "Name:", None))
         self.label_5.setText(_translate("Dialog", "Unit Cost:", None))
@@ -193,5 +197,6 @@ class Ui_Dialog(object):
         self.spnboxPrice.setPrefix(_translate("Dialog", "$ ", None))
         self.label_11.setText(_translate("Dialog", "Group:", None))
         self.btnAdd.setText(_translate("Dialog", "Add", None))
+        self.btnUndo.setText(_translate("Dialog", "Undo", None))
 
 import res_rc
