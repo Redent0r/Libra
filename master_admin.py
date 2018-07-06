@@ -221,6 +221,9 @@ class Purchase(QtGui.QDialog, PurchaseGui):
         self.cmBoxCode.addItems(mec_inventory.unique(self.c, "code", "Inventory"))
         self.cmBoxCode.completer().setCompletionMode(QtGui.QCompleter.PopupCompletion)
         self.cmBoxCode.setEditText("")
+        self.cmBoxCode.activated.connect(self.code_return)
+
+        self.cmboxGroup.activated.connect(self.group_return)
 
         self.code = "" # controlling multiple code input
 
@@ -233,9 +236,92 @@ class Purchase(QtGui.QDialog, PurchaseGui):
     def margin_changed(self):
         pass
 
+    def code_return(self):
+
+        code = self.cmBoxCode.currentText()
+        if self.code != code:
+            self.cmboxGroup.clear()
+            self.cmboxGroup.addItems(mec_inventory.unique(self.c, "groupx", "Inventory", "code", code))
+            self.code = code
+        self.group_return()
+
+    def group_return(self):
+
+        code = self.cmBoxCode.currentText()
+
+        group = self.cmboxGroup.currentText()
+
+        query = mec_inventory.query_add(self.c, code, group) ### temp error
+
+        if query:
+            self.leditName.setText(query[0]) # nombre
+            self.spnboxCost.setValue(query[1]) # costo
+            self.spnboxPrice.setValue(query[2]) # precio sugerido
+            self.cmboxCategory.setEditText(query[3]) # categoria
+            self.spnBoxMin.setValue(query[4]) # min
+            self.spnBoxMax.setValue(query[5]) # max
+
+            self.price_changed()
+            
+        else:
+            QtGui.QMessageBox.information(self, 'Message', ' No previous records of this code have\n'+
+                                                                'been found. New records will be created.')
+
     def add(self):
-        pass
-        
+
+        code = self.cmBoxCode.currentText()
+        name = self.leditName.text().capitalize()
+
+        if code != "" and name != "":
+
+            msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Purchase",
+                                        "Are you sure you want to\n"
+                                         "store this purchase?", parent=self)
+            btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+            btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+            msgbox.exec_()
+
+            if msgbox.clickedButton() == btnYes:
+
+                start = time.time()
+
+                cost = self.spnboxCost.value()
+                margin = self.spnboxMargin.value()
+                price = self.spnboxPrice.value()
+                quantity = self.spnBoxQuantity.value()
+                group = self.cmboxGroup.currentText()
+                cat = self.cmboxCategory.currentText().capitalize()
+                vendor = self.leditVendor.text().capitalize()
+                stockMin = self.spnBoxMin.value() 
+                stockMax = self.spnBoxMax.value() 
+
+
+                ### anadiendo ###
+                succesful = mec_inventory.add_item_entry(self.conn, self.c, code, name,
+                                                         quantity, vendor, cost, price, group, cat, stockMin, stockMax)
+
+                if succesful:
+
+                    self.parent().refreshTables()
+                    QtGui.QMessageBox.information(self, 'Message', 'This purchase has been\n'+
+                                                                        'regstered successfully')
+
+                    self.close()
+
+                else:
+                   QtGui.QMessageBox.critical(self, 'Error', 'An unexpected error occurred.\n'+
+                                                             'Please try again')
+
+                end = time.time()
+                print("compra time: " + str(end-start))
+
+        elif code == "":
+            QtGui.QMessageBox.warning(self, 'Warning', 'Please enter a code')
+
+        else: # nombre == ""
+            QtGui.QMessageBox.warning(self, 'Warning', 'Please enter a name')
+
 ##################### starts everything #############################################
 if __name__ == "__main__":
 
