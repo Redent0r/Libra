@@ -38,8 +38,9 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         # bal
         self.mdlPurchasesBal = QtSql.QSqlQueryModel()
 
+
         # bal
-        self.prox=yPurchasesBal = QtGui.QSortFilterProxyModel()
+        self.proxyPurchasesBal = QtGui.QSortFilterProxyModel()
         self.proxyPurchasesBal.setSourceModel(self.mdlPurchasesBal)
 
         # bal
@@ -350,6 +351,8 @@ class Purchase(QtGui.QDialog, PurchaseGui):
 
         else: # nombre == ""
             QtGui.QMessageBox.warning(self, 'Warning', 'Please enter a name')
+
+
 
 ##################### starts everything #############################################
 if __name__ == "__main__":

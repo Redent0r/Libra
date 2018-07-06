@@ -6,6 +6,7 @@ def create_tables(connection,cursor):
     """
         This function creates the neccessary tables in the database.
     """
+ 
     cursor.execute("CREATE TABLE IF NOT EXISTS OrdinalNumber(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,num TEXT NOT NULL)")
  
     cursor.execute('CREATE TABLE IF NOT EXISTS OrdinalNumberS(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, num TEXT NOT NULL)')
@@ -196,6 +197,8 @@ def calc_bal_year(cursor,year):
     cc = calc_cre(cursor,date)
  
     return [costTot,priceTot,cd,cc,round((priceTot - costTot),2),taxTot,round((priceTot - costTot - taxTot),2)]
+ 
+
 
 def calc_bal_day(cursor,year,month,day):
 
@@ -245,6 +248,32 @@ def calc_bal_day(cursor,year,month,day):
  
     return [costTot,priceTot,cd,cc,round((priceTot - costTot),2),taxTot,round((priceTot - costTot - taxTot),2)]
 #-------------------------------------------------------------------------------------------------------
+def gen_query(cursor,table,column,stri,num):
+    """
+        Returns a list with elements that contain the string.
+        Returns empty list if it does find one.
+    """
+    list1 = []
+    list2 = []
+    
+    query = 'SELECT '+ str(column) +' FROM '+ str(table) 
+    cursor.execute(query)
+    data = cursor.fetchall()
+    if (data == None):
+        return list1
+ 
+    for row in data:
+        list1.append(row[0])
+    for e in list1:
+        if (stri in e ):
+            list2.append(e)
+ 
+    while (len(list2) > num):
+        list2.pop()
+    
+    print(list2)
+    return list2
+
 def calc_deb(cursor, date = None):
     """
         Calculates liquidity.
@@ -284,6 +313,14 @@ def calc_cre(cursor,date = None):
     return cre
  
 #-------------------------------------------------------------------------------------------------------
+ 
+
+def auto_del_0(connection,cursor):
+    cursor.execute('SELECT avail FROM Inventory WHERE avail = 0')
+    data4 = cursor.fetchone()
+    if data4 != None:
+        cursor.execute('DELETE FROM Inventory WHERE avail = 0')
+ 
 def unique(cursor,column,table,key_column = "",key = ""):
     if key_column == "":
         cursor.execute("SELECT DISTINCT "+ column + " FROM " + table)
@@ -318,6 +355,23 @@ def ordinal_generator(connection,cursor):
     connection.commit()
     return ('1' + trans)
 
+def ordinal_generator2(connection,cursor):
+    exists = False
+    trans = ""
+
+    cursor.execute('SELECT MAX(ID) FROM OrdinalNumberS')
+    index = cursor.fetchone()
+    if (index[0] == None):
+        trans = '000000'
+    else:
+        index = str(index[0])
+        trans = index.zfill(6)
+    d = ('a',)
+    cursor.execute('INSERT INTO OrdinalNumberS(num) VALUES (?)',d)
+    connection.commit()
+    return ('2' + trans)
+    
+ 
 def update_all(cursor,code,groupx,cost,price,name,category):
     t = (name,price,cost,category,code,groupx)
     cursor.execute('UPDATE Inventory SET name = ?,priceUniSug = ?,costUni = ?,category = ? WHERE code = ? AND groupx = ?',t)
@@ -329,9 +383,18 @@ def increase_stock(cursor,code,groupx,quantity):
     cursor.execute('UPDATE Inventory SET avail = ? WHERE code = ? AND groupx = ?',(avail,code,groupx))
     return True
 
+def decrease_stock(cursor,code,groupx,quant):
+    #Reduce stock
+    cursor.execute('SELECT avail FROM Inventory WHERE code = ? AND groupx = ?',(code,groupx))
+    data = cursor.fetchone()
+    avail = int(data[0]) - quant
+    cursor.execute('UPDATE Inventory SET avail = ? WHERE code = ? AND groupx = ?',(avail,code,groupx))
+    return True
+
 def print_(cursor,table):#Print any table.
     cursor.execute('SELECT * FROM '+ table)
     data = cursor.fetchall()
     for row in data:
         print(row)
     return True
+
