@@ -386,6 +386,7 @@ class Sale(QtGui.QDialog, SaleGui):
 
         ### functionality ###
         self.btnInsert.clicked.connect(self.add)
+        self.btnUndo.clicked.connect(self.undo)
         self.btnConfirm.clicked.connect(self.confirm)
         self.spnboxPrice.valueChanged.connect(self.price_changed)
         self.spnBoxMargin.valueChanged.connect(self.margin_changed)
@@ -441,12 +442,25 @@ class Sale(QtGui.QDialog, SaleGui):
 
             self.quantity_changed()
 
+    def undo (self):
+
+        self.leditCode.clear()
+        self.leditName.clear()
+        self.leditGroup.clear()
+        self.spnboxCost.setValue(0)
+        self.spnboxPrice.setValue(0)
+        self.spnBoxQuantity.setValue(1)
+        self.spnBoxMargin.setValue(0)
+        self.spnboxDiscount.setValue(0)
+        self.chkBoxItbms.setChecked(True)
+        self.chkBoxCredit.setChecked(False)
+        self.spnBoxTotalItemPrice.setValue(0.00)
 
     def add(self):
 
         ### table view ###
         code = self.leditCode.text()
-
+        
         if code != "":
 
             quantity = self.spnBoxQuantity.value()

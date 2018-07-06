@@ -321,6 +321,22 @@ buscar item por código</string>
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="btnUndo">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Undo</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>
@@ -503,6 +519,16 @@ ITBMS (7.00%)</string>
         <widget class="QPushButton" name="btnConfirm">
          <property name="text">
           <string>Confirm</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnDelete">
+         <property name="text">
+          <string>Delete Entry</string>
          </property>
          <property name="autoDefault">
           <bool>false</bool>
