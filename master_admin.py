@@ -12,6 +12,7 @@ from PyQt4 import QtCore, QtGui, QtSql
 from gui_inventory import Ui_MainWindow as InventoryGui
 from gui_purchase import Ui_Dialog as PurchaseGui
 from gui_sale import Ui_Dialog as SaleGui
+from gui_client import Ui_Dialog as ClientGui
 
 import mec_inventory# stresstest
 
@@ -383,7 +384,157 @@ class Sale(QtGui.QDialog, SaleGui):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
 
-    
+        ### functionality ###
+        self.btnInsert.clicked.connect(self.add)
+        self.btnConfirm.clicked.connect(self.confirm)
+        self.spnboxPrice.valueChanged.connect(self.price_changed)
+        self.spnBoxMargin.valueChanged.connect(self.margin_changed)
+        self.spnBoxQuantity.valueChanged.connect(self.quantity_changed)
+
+        ### abstract table / list of lists ###
+        self.abstractTable = []
+
+        ### sqlite 3 connection from parent ###
+        self.conn = self.parent().conn
+        self.c = self.parent().c
+
+    def margin_changed(self):
+
+        price = (1 + (self.spnBoxMargin.value() / 100)) * self.spnboxCost.value()
+        self.spnboxPrice.setValue(price)
+
+        self.quantity_changed()
+
+    def quantity_changed(self):
+
+        priceTotalItem = self.spnboxPrice.value() * self.spnBoxQuantity.value()
+        self.spnBoxTotalItemPrice.setValue(priceTotalItem)
+
+    def refreshTotals(self):
+
+        if self.abstractTable:
+            taxes = 0.0
+            discounts = 0.0
+            subtotal = 0.0
+
+            for line in self.abstractTable:
+                taxes += line[2] * line[3] * line[1] # impuesto * precio * cantidad
+                discounts += (1 + line[2]) * line [3] * line[4] * line[1] # (1 + impuesto) * precio * desc * cant
+                subtotal += line[3] * line[1] # precio * cantidad
+
+            self.spnBoxSubtotal.setValue(subtotal)
+            self.spnBoxTaxT.setValue(taxes)
+            self.spnBoxDiscountT.setValue(discounts)
+            self.spnBoxGrandTotal.setValue(subtotal + taxes - discounts)
+
+        else:
+            self.spnBoxSubtotal.setValue(0)
+            self.spnBoxTaxT.setValue(0)
+            self.spnBoxDiscountT.setValue(0)
+            self.spnBoxGrandTotal.setValue(0)
+
+    def price_changed(self):
+
+        if self.spnboxCost.value() > 0:
+            margin = (self.spnboxPrice.value() / self.spnboxCost.value()) * 100 - 100
+            self.spnBoxMargin.setValue(margin) # sets margin
+
+            self.quantity_changed()
+
+
+    def add(self):
+
+        ### table view ###
+        code = self.leditCode.text()
+
+        if code != "":
+
+            quantity = self.spnBoxQuantity.value()
+            group = self.leditGroup.text()
+            error = mec_inventory.sale_valid(self.c, code, client, quantity, group) # returns list of errors
+
+            if not error:
+                ### shopping cart table ###
+                line = []
+                line.append(QtGui.QStandardItem(self.leditCode.text()))
+                line.append(QtGui.QStandardItem(self.leditName.text()))
+                line.append(QtGui.QStandardItem(self.spnboxPrice.text()))
+                line.append(QtGui.QStandardItem(self.spnBoxQuantity.text()))
+                line.append(QtGui.QStandardItem(self.spnBoxTotalItemPrice.text()))
+
+                self.model.appendRow(line)
+
+                ### abstract table ###
+                line = []
+                line.append(self.leditCode.text()) # 0
+                line.append(quantity) # 1
+                line.append(float(0.07 if self.chkBoxItbms.isChecked() else 0.0)) # 2
+                line.append(self.spnboxPrice.value()) # 3
+                line.append(self.spnboxDiscount.value() / 100) # 4 # percentage
+                line.append("CRE" if self.chkBoxCredit.isChecked() else "DEB") # 5
+                line.append(self.leditGroup.text()) # 7
+
+                self.abstractTable.append(line)
+                self.refreshTotals()
+                self.undo()
+
+            elif 3 in error: # error code for missinng client
+                QtGui.QMessageBox.information(self, 'Message', 'No previous records of this client\n' +
+                                                    'have been found. Please create it')
+                newClient = Client(self.parent())
+                newClient.leditName.setText(client)
+                newClient.show()
+
+            elif 2 in error:
+                QtGui.QMessageBox.warning(self, 'Warning', 'The item quantity you wish to sell\n' +
+                                                    'is not available in your inventory')
+            else:
+                QtGui.QMessageBox.critical(self, 'Error', 'An unexpected error has occurred.\n' +
+                                                    'Please try again')
+                self.refresh_inventory()
+        else: # code == ""
+            QtGui.QMessageBox.warning(self, 'Error', 'Please select\n' +
+                                                    'an inventory item')
+
+    def confirm(self):
+
+        if self.abstractTable:
+
+            msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Sell",
+                                        "Are you sure you\n"
+                                         "want to make this sale?", parent=self)
+            btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+            btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+            msgbox.exec_()
+
+            if msgbox.clickedButton() == btnYes:
+
+                start = time.time()
+
+                if mec_inventory.shopping_cart(self.conn, self.c, self.abstractTable):
+
+                    self.parent().refreshTables()
+                    del self.abstractTable [:]
+                    for i in range(self.model.rowCount()):
+                        self.model.removeRow(0)
+                    self.refreshTotals()
+                    self.undo()
+
+                    end = time.time()
+                    print("time venta: " + str(end - start))
+
+                    QtGui.QMessageBox.information(self, 'Message', 'The transaction has been\n'+
+                                                                        'registered successfully')
+                else:
+                    
+                    QtGui.QMessageBox.critical(self, 'Error', 'An unexpected error has occurred.\n' +
+                                                            'Please try again')
+                self.refresh_inventory() # regardless succesful or not
+        else:
+            QtGui.QMessageBox.warning(self, 'Warning', 'Please insert an item\n' +
+                                                        'to be sold')
+
 ##################### starts everything #############################################
 if __name__ == "__main__":
 

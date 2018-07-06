@@ -154,6 +154,16 @@ class Ui_Dialog(object):
         self.verticalLayout.addLayout(self.formLayout_2)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
+        self.btnInsert = QtGui.QPushButton(Dialog)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.btnInsert.sizePolicy().hasHeightForWidth())
+        self.btnInsert.setSizePolicy(sizePolicy)
+        self.btnInsert.setAutoDefault(False)
+        self.btnInsert.setDefault(False)
+        self.btnInsert.setObjectName(_fromUtf8("btnInsert"))
+        self.horizontalLayout_3.addWidget(self.btnInsert)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         self.formLayout = QtGui.QFormLayout()
         self.formLayout.setObjectName(_fromUtf8("formLayout"))
@@ -239,6 +249,10 @@ class Ui_Dialog(object):
         self.verticalLayout.addLayout(self.formLayout_3)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
+        self.btnConfirm = QtGui.QPushButton(Dialog)
+        self.btnConfirm.setAutoDefault(False)
+        self.btnConfirm.setObjectName(_fromUtf8("btnConfirm"))
+        self.horizontalLayout_2.addWidget(self.btnConfirm)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.horizontalLayout.addLayout(self.verticalLayout)
 
@@ -268,6 +282,7 @@ class Ui_Dialog(object):
         self.spnBoxMargin.setPrefix(_translate("Dialog", "% ", None))
         self.spnboxDiscount.setPrefix(_translate("Dialog", "% ", None))
         self.label_14.setText(_translate("Dialog", "Group:", None))
+        self.btnInsert.setText(_translate("Dialog", "Insert", None))
         self.label_4.setText(_translate("Dialog", "Subtotal:", None))
         self.spnBoxSubtotal.setPrefix(_translate("Dialog", "$ ", None))
         self.label_7.setText(_translate("Dialog", "Sales Tax:", None))
@@ -279,5 +294,6 @@ class Ui_Dialog(object):
         self.spnBoxGrandTotal.setToolTip(_translate("Dialog", "SubTotal + \n"
 "ITBMS (7.00%)", None))
         self.spnBoxGrandTotal.setPrefix(_translate("Dialog", "$ ", None))
+        self.btnConfirm.setText(_translate("Dialog", "Confirm", None))
 
 import res_rc

@@ -16,6 +16,8 @@ def create_tables(connection,cursor):
     cursor.execute("""CREATE TABLE IF NOT EXISTS Entries(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,dat TEXT,trans TEXT,code TEXT NOT NULL,name TEXT NOT NULL,quantity INTEGER NOT NULL,provider TEXT ,costUni REAL NOT NULL,costItems REAL NOT NULL,groupx TEXT NOT NULL, category TEXT)""") 
  
     cursor.execute("""CREATE TABLE IF NOT EXISTS Outs(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,dat TEXT,trans TEXT,code TEXT NOT NULL,name TEXT NOT NULL,quantity INTEGER NOT NULL,groupx TEXT NOT NULL,priceUni REAL,priceItems REAL,tax REAL,revenue REAL,winnings REAL,payment TEXT,client TEXT)""")
+ 
+    cursor.execute('CREATE TABLE IF NOT EXISTS Clients(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,identification TEXT,name TEXT,mail TEXT,num TEXT,cel TEXT,fax TEXT ,direction TEXT,bought INTEGER,money_invested REAL,paid REAL,debt REAL)')
 
     connection.commit()
     return True
@@ -116,6 +118,36 @@ def shopping_cart(connection,cursor,lista):
  
     return True
  
+ 
+def sale_valid(cursor,code,client_name,quantity,groupx):
+    """
+    Checks If client ,quantity, or code exists.
+    0 = Sucessful
+    1 = does not exists. 2 = reduces below existing units ,
+    3 = client does not exist
+ 
+    """    
+    l = []
+    a = (code,groupx)
+    b = (client_name,)
+    cursor.execute('SELECT code,avail FROM Inventory WHERE code = ? AND groupx = ?',a)
+    data0 = cursor.fetchone()
+    if (data0 == None):
+        l.append(1)
+    if (data0 != None):
+        if (data0[1] < quantity):
+            l.append(2)
+            
+   
+    cursor.execute('SELECT name FROM Clients WHERE name = ?',b)
+    data2 = cursor.fetchone()
+    if (data2 == None):
+        l.append(3)
+ 
+    if (len(l) == 0):
+        l = 0
+ 
+    return l
 
 def sale_valid2(cursor,code,quantity,groupx):
     """
