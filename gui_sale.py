@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'gui_sale.ui'
+# Form implementation generated from reading ui file 'gui_venta.ui'
 #
 # Created by: PyQt4 UI code generator 4.12.1
 #
@@ -49,6 +49,9 @@ class Ui_Dialog(object):
         self.horizontalLayout_4 = QtGui.QHBoxLayout()
         self.horizontalLayout_4.setContentsMargins(-1, 0, -1, -1)
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
+        self.cmboxInventory = QtGui.QComboBox(self.groupBox_2)
+        self.cmboxInventory.setObjectName(_fromUtf8("cmboxInventory"))
+        self.horizontalLayout_4.addWidget(self.cmboxInventory)
         self.leditInventory = QtGui.QLineEdit(self.groupBox_2)
         self.leditInventory.setObjectName(_fromUtf8("leditInventory"))
         self.horizontalLayout_4.addWidget(self.leditInventory)
@@ -323,9 +326,9 @@ class Ui_Dialog(object):
         self.leditInventory.setPlaceholderText(_translate("Dialog", "Search...", None))
         self.label_11.setText(_translate("Dialog", "Client:", None))
         self.label.setText(_translate("Dialog", "Code:", None))
-        self.leditCode.setToolTip(_translate("Dialog", "Presione Enter para \n"
-"buscar item por código", None))
-        self.leditCode.setWhatsThis(_translate("Dialog", "Inserte el codigo del item aqui\n"
+        self.leditCode.setToolTip(_translate("Dialog", "Press Enter to \n"
+"search item by code", None))
+        self.leditCode.setWhatsThis(_translate("Dialog", "Insert the code item here\n"
 "", None))
         self.label_10.setText(_translate("Dialog", "Name:", None))
         self.label_6.setText(_translate("Dialog", "Item Price:", None))

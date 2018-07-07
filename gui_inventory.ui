@@ -62,7 +62,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <property name="iconSize">
        <size>
@@ -596,6 +596,37 @@
            </spacer>
           </item>
           <item>
+           <widget class="QComboBox" name="cmboxInventory">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>20</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="editable">
+             <bool>false</bool>
+            </property>
+            <property name="insertPolicy">
+             <enum>QComboBox::InsertAtBottom</enum>
+            </property>
+            <property name="modelColumn">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLineEdit" name="leditInventory">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -667,6 +698,16 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="QComboBox" name="cmboxPurchases"/>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="leditPurchases">
+            <property name="placeholderText">
+             <string>Search...</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -731,6 +772,16 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cmboxSales"/>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="leditSales">
+            <property name="placeholderText">
+             <string>Search...</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

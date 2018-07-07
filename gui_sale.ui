@@ -60,6 +60,9 @@
          <number>0</number>
         </property>
         <item>
+         <widget class="QComboBox" name="cmboxInventory"/>
+        </item>
+        <item>
          <widget class="QLineEdit" name="leditInventory">
           <property name="placeholderText">
            <string>Search...</string>

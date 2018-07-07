@@ -84,7 +84,11 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.actionClient.triggered.connect(self.action_client)
 
         self.leditInventory.textEdited.connect(lambda: self.search(self.leditInventory.text(), self.proxyInventory))
+        self.leditPurchases.textEdited.connect(lambda: self.search(self.leditPurchases.text(), self.proxyPurchases))
+        self.leditSales.textEdited.connect(lambda: self.search(self.leditSales.text(), self.proxySales))
 
+        self.cmboxInventory.activated.connect(lambda: self.combo_box_changed(self.cmboxInventory, self.proxyInventory))
+        self.cmboxPurchases.activated.connect(lambda: self.combo_box_changed(self.cmboxPurchases, self.proxyPurchases))
 
         self.radioHistoric.toggled.connect(lambda: self.set_balance(self.radioHistoric))
         self.radioAnnual.toggled.connect(lambda: self.set_balance(self.radioAnnual))
@@ -115,12 +119,13 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
                     "Suggested Price", "Minimum Quantity", "Maximum Quantity", "Category"]
         for i in range(len(headers)):
             self.mdlInventory.setHeaderData(i, QtCore.Qt.Horizontal, headers[i]) # +1 for id col
-
+        self.cmboxInventory.addItems(headers) # add headers to combo box
 
         headers = ["Date", "Transaction", "Code", "Name", "Group", "Quantity", "Vendor",
                     "Unit Cost", "Total Cost", "Category"]
         for i in range(len(headers)):
             self.mdlPurchases.setHeaderData(i, QtCore.Qt.Horizontal, headers[i])
+        self.cmboxPurchases.addItems(headers)
 
         headers = ["Date", "Transaction", "Code", "Name", "Group", "Quantity", "Unit Price",
                     "Total Price", "Client", "Pay"]
@@ -496,12 +501,12 @@ class Sale(QtGui.QDialog, SaleGui):
         header = ["Code", "Name", "Available", "Group"]
         for i in range(len(header)):
             self.mdlInventory.setHeaderData(i, QtCore.Qt.Horizontal, header[i])
-
+        self.cmboxInventory.addItems(header) # add headers to combo box
 
         self.tblInventory.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
 
         # search funnctionality
-
+        self.cmboxInventory.activated.connect(self.combo_box_changed)
         self.leditInventory.textChanged.connect(lambda: self.search(self.leditInventory.text()))
         self.proxyInventory.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive) # case insennsitive
 
@@ -509,6 +514,9 @@ class Sale(QtGui.QDialog, SaleGui):
         self.conn = self.parent().conn
         self.c = self.parent().c
 
+    def combo_box_changed(self):
+
+        self.proxyInventory.setFilterKeyColumn(self.cmboxInventory.currentIndex())
 
     def search(self, text):
 
