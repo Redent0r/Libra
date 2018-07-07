@@ -36,10 +36,17 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.db.open()
 
          ### Table Models ###
+        self.mdlClients = QtSql.QSqlQueryModel()
+        self.mdlPurchases = QtSql.QSqlQueryModel()
+        self.mdlSales = QtSql.QSqlQueryModel()
         self.mdlInventory = QtSql.QSqlQueryModel()
         # bal
         self.mdlPurchasesBal = QtSql.QSqlQueryModel()
         self.mdlSalesBal = QtSql.QSqlQueryModel()
+       
+        ### sort filter proxy model ###
+        self.proxyInventory = QtGui.QSortFilterProxyModel()
+        self.proxyInventory.setSourceModel(self.mdlInventory)
 
         # bal
         self.proxyPurchasesBal = QtGui.QSortFilterProxyModel()
@@ -47,9 +54,15 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.proxySalesBal = QtGui.QSortFilterProxyModel()
         self.proxySalesBal.setSourceModel(self.mdlSalesBal)
 
+        ### proxy filter parameters
+        self.proxyInventory.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive) # case insennsitive
+
         # bal
         self.proxyPurchasesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.proxySalesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
+
+        #### setting models to tables ###
+        self.tblInventory.setModel(self.proxyInventory)
 
         # bal
         self.tblPurchasesBal.setModel(self.proxyPurchasesBal)
@@ -59,6 +72,9 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.actionRefresh.triggered.connect(self.refreshTables)
         self.actionPurchase.triggered.connect(self.action_purchase)
         self.actionSale.triggered.connect(self.action_sale)
+
+        self.leditInventory.textEdited.connect(lambda: self.search(self.leditInventory.text(), self.proxyInventory))
+
 
         self.radioHistoric.toggled.connect(lambda: self.set_balance(self.radioHistoric))
         self.radioAnnual.toggled.connect(lambda: self.set_balance(self.radioAnnual))
@@ -74,8 +90,22 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.c = self.conn.cursor()
         mec_inventory.create_tables(self.conn, self.c)
 
+        ########################## STRESSS TESTTTTTT ################################
+        #stresstest.test_entries(self.conn, self.c, 10)
+        #stresstest.test_entries(self.conn, self.c, 100)
+        #stresstest.test_entries(self.conn, self.c, 250)
+        #stresstest.test_entries(self.conn, self.c, 500)
+        #stresstest.test_entries(self.conn, self.c, 1000)
+        ################################################################################
+
         self.set_balance(self.radioHistoric)
         self.refreshTables()
+
+        headers = ["Code", "Name", "Group", "Available Quantity", "Unit Cost",
+                    "Suggested Price", "Minimum Quantity", "Maximum Quantity", "Category"]
+        for i in range(len(headers)):
+            self.mdlInventory.setHeaderData(i, QtCore.Qt.Horizontal, headers[i]) # +1 for id col
+
 
         # headers bal
         headers = ["Date", "Transaction", "Code", "Quantity", "Total Cost"]
@@ -85,6 +115,9 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         headers = ["Date", "Transaction", "Code", "Quantity", "Total Price"]
         for i in range(len(headers)):
             self.mdlSalesBal.setHeaderData(i, QtCore.Qt.Horizontal, headers[i])
+
+        ### table uniform stretch ###
+        self.tblInventory.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
 
         # bal stretch
         self.tblBalance.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -101,6 +134,15 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         self.mdlInventory.setQuery("""SELECT code, name, groupx, avail, costUni, priceUniSug,
                                    stockmin, stockmax, category FROM Inventory""", self.db)
+
+        self.mdlPurchases.setQuery("""SELECT dat, trans, code, name, groupx, quantity, 
+                                provider, costUni, costItems, category FROM Entries""", self.db)
+
+        self.mdlSales.setQuery("""SELECT dat, trans, code, name, groupx, quantity, priceUni, 
+                                priceItems, client, payment FROM Outs""", self.db)
+
+        self.mdlClients.setQuery("""SELECT identification, name, money_invested, debt,
+                                     mail, num, cel FROM Clients""", self.db)
 
         # bal tables
         self.mdlPurchasesBal.setQuery(""" SELECT dat, trans, code, quantity, costItems 
@@ -152,15 +194,15 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
                 # [costoTot,precioTot,cd,cc,ingresoTot,impuestoTot,gananciaTot]
 
             elif radioButton == self.radioAnnual:
-
+   
                 date = str(self.dateAnnual.date().toPyDate())
                 self.search(date[0:4], self.proxyPurchasesBal)
                 self.search(date[0:4], self.proxySalesBal)
                 items = mec_inventory.calc_bal_year(self.c, date[0:4])
                 # [costoTot,precioTot,cd,cc,ingresoTot,impuestoTot,gananciaTot]
-
+                
             else: # radio mensual
-
+ 
                 date = str(self.dateMonthly.date().toPyDate())
                 self.search((date[0:4] + "-" + date[5:7]), self.proxyPurchasesBal)
                 self.search((date[0:4] + "-" + date[5:7]), self.proxySalesBal)
@@ -230,10 +272,11 @@ class Purchase(QtGui.QDialog, PurchaseGui):
         ### functionality ###
         self.btnAdd.clicked.connect(self.add)
         self.btnUndo.clicked.connect(self.undo)
-
+        
         self.spnboxMargin.valueChanged.connect(self.margin_changed)
         self.spnboxPrice.valueChanged.connect(self.price_changed)
         self.spnboxCost.valueChanged.connect(self.cost_changed)
+
 
         ### connection, from parent #######
         self.conn = self.parent().conn
@@ -307,7 +350,7 @@ class Purchase(QtGui.QDialog, PurchaseGui):
                                                                 'been found. New records will be created.')
             
     def undo(self):
-
+ 
         self.leditName.clear()
         self.spnboxCost.setValue(0)
         self.spnBoxQuantity.setValue(1)
@@ -348,7 +391,7 @@ class Purchase(QtGui.QDialog, PurchaseGui):
                 vendor = self.leditVendor.text().capitalize()
                 stockMin = self.spnBoxMin.value() 
                 stockMax = self.spnBoxMax.value() 
-
+               
 
                 ### anadiendo ###
                 succesful = mec_inventory.add_item_entry(self.conn, self.c, code, name,
@@ -362,7 +405,7 @@ class Purchase(QtGui.QDialog, PurchaseGui):
                                                                         'regstered successfully')
 
                     self.close()
-
+                    
                 else:
                    QtGui.QMessageBox.critical(self, 'Error', 'An unexpected error occurred.\n'+
                                                              'Please try again')
@@ -375,7 +418,7 @@ class Purchase(QtGui.QDialog, PurchaseGui):
 
         else: # nombre == ""
             QtGui.QMessageBox.warning(self, 'Warning', 'Please enter a name')
-
+        
 
 class Sale(QtGui.QDialog, SaleGui):
 
@@ -383,21 +426,89 @@ class Sale(QtGui.QDialog, SaleGui):
 
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
-
+        
         ### functionality ###
         self.btnInsert.clicked.connect(self.add)
         self.btnUndo.clicked.connect(self.undo)
         self.btnConfirm.clicked.connect(self.confirm)
+        self.btnDelete.clicked.connect(self.delete_entry)
         self.spnboxPrice.valueChanged.connect(self.price_changed)
         self.spnBoxMargin.valueChanged.connect(self.margin_changed)
         self.spnBoxQuantity.valueChanged.connect(self.quantity_changed)
+        self.tblInventory.clicked.connect(self.table_clicked)
+
+        ### combo box nombre config ###
+        self.cmboxClient.setModel(self.parent().mdlClients)
+        self.cmboxClient.setModelColumn(1)
+        self.cmboxClient.completer().setCompletionMode(QtGui.QCompleter.PopupCompletion)
+        self.cmboxClient.setEditText("")
+
+        ### table ###
+        self.model = QtGui.QStandardItemModel()
+        self.model.setColumnCount(5)
+        header = ["Code", "Name",  "Item Price", "Quantity", "Total Price"]
+        self.model.setHorizontalHeaderLabels(header)
+        self.tblItems.setModel(self.model)
 
         ### abstract table / list of lists ###
         self.abstractTable = []
 
+        ### mini innventario ###
+        self.mdlInventory = QtSql.QSqlQueryModel()
+        self.proxyInventory = QtGui.QSortFilterProxyModel()
+        self.proxyInventory.setSourceModel(self.mdlInventory)
+        self.tblInventory.setModel(self.proxyInventory)
+
+        self.refresh_inventory()
+        header = ["Code", "Name", "Available", "Group"]
+        for i in range(len(header)):
+            self.mdlInventory.setHeaderData(i, QtCore.Qt.Horizontal, header[i])
+
+
+        self.tblInventory.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
+
+        # search funnctionality
+
+        self.leditInventory.textChanged.connect(lambda: self.search(self.leditInventory.text()))
+        self.proxyInventory.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive) # case insennsitive
+
         ### sqlite 3 connection from parent ###
         self.conn = self.parent().conn
         self.c = self.parent().c
+
+
+    def search(self, text):
+
+        self.proxyInventory.setFilterRegExp("^" + text)
+
+    def refresh_inventory(self):
+
+        self.mdlInventory.setQuery("""SELECT code, name, avail, groupx
+                                         FROM Inventory""", self.parent().db) # uses parent connection
+
+    def table_clicked(self):
+
+        self.spnBoxQuantity.setValue(1) # reset cantidad
+        index = self.tblInventory.selectionModel().selectedRows() ### list of indexes
+        row = int(index[0].row()) # selected row
+        code = self.proxyInventory.data(self.proxyInventory.index(row, 0))
+        group = self.proxyInventory.data(self.proxyInventory.index(row, 3))
+
+        query = mec_inventory.query_sale(self.c, code, group)
+ 
+        if query:
+
+            self.leditCode.setText(code) # arg
+            self.leditName.setText(query[0])
+            self.leditGroup.setText(group)
+            self.spnboxPrice.setValue(query[1])
+            self.spnboxCost.setValue(query[2])
+            self.price_changed()
+
+        else:
+            QtGui.QMessageBox.critical(self, 'Error', "An unexpected error has occurred.\n" +
+                                                    "Please try again")
+            self.refresh_inventory()
 
     def margin_changed(self):
 
@@ -433,6 +544,27 @@ class Sale(QtGui.QDialog, SaleGui):
             self.spnBoxTaxT.setValue(0)
             self.spnBoxDiscountT.setValue(0)
             self.spnBoxGrandTotal.setValue(0)
+    
+    def delete_entry(self):
+        
+            index = self.tblItems.selectionModel().selectedRows() ### list of indexes
+            if (index):
+                row = int(index[0].row()) # selected row
+
+                self.model.removeRow(row)
+
+                if row == 0:
+                    self.cmboxClient.setEnabled(True)
+
+                del self.abstractTable[row] # deletes from abstract table
+
+                self.refreshTotals()
+
+                self.tblItems.clearSelection()
+
+            else:
+                QtGui.QMessageBox.information(self, 'Message', 'Please select the line\n' +
+                                                        'you wish to remove')
 
     def price_changed(self):
 
@@ -443,7 +575,7 @@ class Sale(QtGui.QDialog, SaleGui):
             self.quantity_changed()
 
     def undo (self):
-
+        
         self.leditCode.clear()
         self.leditName.clear()
         self.leditGroup.clear()
@@ -455,14 +587,15 @@ class Sale(QtGui.QDialog, SaleGui):
         self.chkBoxItbms.setChecked(True)
         self.chkBoxCredit.setChecked(False)
         self.spnBoxTotalItemPrice.setValue(0.00)
-
+        
     def add(self):
 
         ### table view ###
         code = self.leditCode.text()
         
         if code != "":
-
+            
+            client = self.cmboxClient.currentText()
             quantity = self.spnBoxQuantity.value()
             group = self.leditGroup.text()
             error = mec_inventory.sale_valid(self.c, code, client, quantity, group) # returns list of errors
@@ -475,7 +608,7 @@ class Sale(QtGui.QDialog, SaleGui):
                 line.append(QtGui.QStandardItem(self.spnboxPrice.text()))
                 line.append(QtGui.QStandardItem(self.spnBoxQuantity.text()))
                 line.append(QtGui.QStandardItem(self.spnBoxTotalItemPrice.text()))
-
+                
                 self.model.appendRow(line)
 
                 ### abstract table ###
@@ -486,11 +619,13 @@ class Sale(QtGui.QDialog, SaleGui):
                 line.append(self.spnboxPrice.value()) # 3
                 line.append(self.spnboxDiscount.value() / 100) # 4 # percentage
                 line.append("CRE" if self.chkBoxCredit.isChecked() else "DEB") # 5
+                line.append(self.cmboxClient.currentText()) # 6
                 line.append(self.leditGroup.text()) # 7
-
+ 
                 self.abstractTable.append(line)
                 self.refreshTotals()
                 self.undo()
+                self.cmboxClient.setEnabled(False) # disable edit client
 
             elif 3 in error: # error code for missinng client
                 QtGui.QMessageBox.information(self, 'Message', 'No previous records of this client\n' +
@@ -503,6 +638,7 @@ class Sale(QtGui.QDialog, SaleGui):
                 QtGui.QMessageBox.warning(self, 'Warning', 'The item quantity you wish to sell\n' +
                                                     'is not available in your inventory')
             else:
+
                 QtGui.QMessageBox.critical(self, 'Error', 'An unexpected error has occurred.\n' +
                                                     'Please try again')
                 self.refresh_inventory()
@@ -533,7 +669,9 @@ class Sale(QtGui.QDialog, SaleGui):
                     for i in range(self.model.rowCount()):
                         self.model.removeRow(0)
                     self.refreshTotals()
+                    self.cmboxClient.clearEditText()
                     self.undo()
+                    self.cmboxClient.setEnabled(True)
 
                     end = time.time()
                     print("time venta: " + str(end - start))
@@ -549,10 +687,92 @@ class Sale(QtGui.QDialog, SaleGui):
             QtGui.QMessageBox.warning(self, 'Warning', 'Please insert an item\n' +
                                                         'to be sold')
 
+class Client(QtGui.QDialog, ClientGui):
+
+    def __init__(self, parent=None):
+
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
+
+        ### functionality ###
+        self.btnUndo.clicked.connect(self.undo)
+        self.btnAdd.clicked.connect(self.anadir)
+
+        ### validators ###
+        regexpPhone = QtCore.QRegExp("^[0-9-()]*$") # 0-9 or - or ()
+        phoneVal = QtGui.QRegExpValidator(regexpPhone)
+        self.leditPhone.setValidator(phoneVal)
+        self.leditCellphone.setValidator(phoneVal)
+        self.leditFax.setValidator(phoneVal)
+
+        ### connection, from parent ###
+        self.conn = self.parent().conn
+        self.c = self.parent().c
+
+    def anadir(self):
+
+        name = self.leditName.text().title()
+        if name != "":
+            msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Add Client",
+                                        "Are you sure you want to\n"
+                                         "add this client?", parent=self)
+            btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+            btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+            msgbox.exec_()
+
+            if msgbox.clickedButton() == btnYes:
+
+                start = time.time()
+
+                id = self.leditID.text()
+                phone = self.leditPhone.text()
+                cellphone = self.leditCellphone.text()
+                address = self.leditAddress.text().capitalize()
+                email = self.leditEmail.text()
+                fax = self.leditFax.text()
+
+                if mec_inventory.add_client(self.conn, self.c, id, name, email, phone, cellphone, fax, address):
+                    
+                    self.parent().refreshTables()
+                    self.undo()
+                    QtGui.QMessageBox.information(self, 'Message', 'The client has been\n'+
+                                                                        'added successfully')
+                    
+                else:
+                    QtGui.QMessageBox.warning(self, 'Error', 'The client that you are trying\n' +
+                                                            'to add already exists')
+
+                end = time.time()
+                print("time cliente: " + str(end - start))
+
+        else: # nombre == ""
+            QtGui.QMessageBox.warning(self, 'Warning', 'Please insert a name')
+
+    def undo(self):
+
+        self.leditName.clear()
+        self.leditID.clear()
+        self.leditPhone.clear()
+        self.leditCellphone.clear()
+        self.leditAddress.clear()
+        self.leditFax.clear()
+        self.leditEmail.clear()
+
 ##################### starts everything #############################################
 if __name__ == "__main__":
 
     app = QtGui.QApplication(sys.argv)
+
     inventory = Inventory() # borrar esto
     inventory.show() # si se va a condicionar al nas location
+
+    # if os.path.isdir("\\\\NASPAREDES\\db"):
+    #     inventario = Inventario()
+    #     inventario.show()
+    # else:
+    #     widget = QtGui.QWidget()
+    #     QtGui.QMessageBox.warning( widget, 'Error de conexin', 'Necesitamos que este conectado a\n' +
+    #                                                     'la red wifi')
+
     sys.exit(app.exec_())
