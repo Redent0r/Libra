@@ -461,7 +461,18 @@ def gen_query(cursor,table,column,stri,num):
     
     print(list2)
     return list2
-
+ 
+def paid(connection,cursor,trans):
+    """
+        Marks an item as paid.
+    """
+    t = (trans,)
+    cursor.execute("UPDATE Outs SET payment = 'DEB' WHERE trans = ?",(trans,))
+    cursor.execute("SELECT client FROM Outs WHERE trans = ?",(trans,))
+    data = cursor.fetchone()
+    update_client_info(connection,cursor,data[0])
+    connection.commit()
+ 
 def move_to_credit(connection,cursor,trans):
     """
         Marks an item as not paid.

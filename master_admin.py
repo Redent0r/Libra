@@ -63,7 +63,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.proxyInventory.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive) # case insennsitive
         self.proxyPurchases.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.proxySales.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        #self.proxyClients.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.proxyClients.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         # bal
         self.proxyPurchasesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.proxySalesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
