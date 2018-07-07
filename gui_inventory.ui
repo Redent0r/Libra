@@ -62,7 +62,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <property name="iconSize">
        <size>
@@ -761,6 +761,46 @@
            <number>0</number>
           </property>
           <item>
+           <widget class="QPushButton" name="btnRemoveSale">
+            <property name="toolTip">
+             <string>Reverse sale</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="res.qrc">
+              <normaloff>:/icons/resources/undo-512.png</normaloff>:/icons/resources/undo-512.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSettle">
+            <property name="toolTip">
+             <string>Settle debt</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="res.qrc">
+              <normaloff>:/icons/resources/payment-256.png</normaloff>:/icons/resources/payment-256.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -841,6 +881,16 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cmboxClients"/>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="leditClients">
+            <property name="placeholderText">
+             <string>Search...</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
