@@ -19,6 +19,7 @@ def create_tables(connection,cursor):
  
     cursor.execute('CREATE TABLE IF NOT EXISTS Clients(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,identification TEXT,name TEXT,mail TEXT,num TEXT,cel TEXT,fax TEXT ,direction TEXT,bought INTEGER,money_invested REAL,paid REAL,debt REAL)')
 
+    add_client(connection,cursor,'Misc','','','','','','')
     connection.commit()
     return True
  
@@ -189,6 +190,63 @@ def query_sale(cursor,code,groupx):
         return False
 
     return data 
+
+#-------------------------------------------------------------------------------------------------------
+ 
+def add_client(connection,cursor,identification,name,mail,num,cel,fax,direction):
+    """
+        Adds client to client table.
+        Returns False if the name has been used before.
+    """
+    bought = 0
+    money_invested = 0.0
+    paid = 0.0
+    debt = 0.0
+    i = (name,)
+    cursor.execute('SELECT name FROM Clients WHERE name = ?',i)
+    data = cursor.fetchone()
+    if (data != None):
+        print('Name already used.')
+        return False
+    t = (identification,name,mail,num,cel,fax,direction,bought,money_invested,paid,debt)
+    cursor.execute("INSERT INTO Clients (identification,name,mail,num,cel,fax,direction,bought,money_invested,paid,debt) VALUES (?,?,?,?,?,?,?,?,?,?,?)",t)
+    connection.commit()
+    return True
+ 
+ 
+def update_client_info(connection,cursor,user):
+
+    a = (user,)
+    money = []
+    articles = []
+    cursor.execute('SELECT priceItems,quantity FROM Outs WHERE client = ? ',a)
+    data2 = cursor.fetchall()
+    if (data2 == None):
+        return False
+    for row2 in data2:
+        money.append(row2[0])
+    for row2 in data2:
+        articles.append(row2[1])
+    debit = []
+    credit = []
+    cursor.execute("SELECT priceItems FROM Outs WHERE client = ? AND payment = 'DEB'",a)
+    data4 = cursor.fetchall()
+    for row4 in data4:
+        debit.append(row4[0])
+        
+    cursor.execute("SELECT priceItems FROM Outs WHERE client = ? AND payment = 'CRE'",a)
+    data5 = cursor.fetchall()
+    for row5 in data5:
+        credit.append(row5[0])
+ 
+    money = sum(money)
+    articles = sum(articles)
+    debit = sum(debit)
+    credit =sum(credit)
+ 
+    cursor.execute('UPDATE Clients SET bought = ?,money_invested = ?,paid = ?,debt = ? WHERE name = ?',(articles,money,debit,credit,user))
+
+    connection.commit()
 
 
 #-------------------------------------------------------------------------------------------------------
