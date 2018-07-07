@@ -462,6 +462,16 @@ def gen_query(cursor,table,column,stri,num):
     print(list2)
     return list2
 
+def move_to_credit(connection,cursor,trans):
+    """
+        Marks an item as not paid.
+    """
+    cursor.execute("UPDATE Outs SET payment = 'CRE' WHERE trans = ?",(trans,))
+    cursor.execute("SELECT client FROM Outs WHERE trans = ?",(trans,))
+    data = cursor.fetchone()
+    update_client_info(connection,cursor,data[0])
+    connection.commit()
+ 
 def calc_deb(cursor, date = None):
     """
         Calculates liquidity.

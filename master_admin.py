@@ -47,7 +47,12 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         ### sort filter proxy model ###
         self.proxyInventory = QtGui.QSortFilterProxyModel()
         self.proxyInventory.setSourceModel(self.mdlInventory)
-
+        self.proxyPurchases = QtGui.QSortFilterProxyModel()
+        self.proxyPurchases.setSourceModel(self.mdlPurchases)
+        self.proxySales = QtGui.QSortFilterProxyModel()
+        self.proxySales.setSourceModel(self.mdlSales)
+        self.proxyClients = QtGui.QSortFilterProxyModel()
+        self.proxyClients.setSourceModel(self.mdlClients)
         # bal
         self.proxyPurchasesBal = QtGui.QSortFilterProxyModel()
         self.proxyPurchasesBal.setSourceModel(self.mdlPurchasesBal)
@@ -56,14 +61,18 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         ### proxy filter parameters
         self.proxyInventory.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive) # case insennsitive
-
+        self.proxyPurchases.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.proxySales.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        #self.proxyClients.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         # bal
         self.proxyPurchasesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.proxySalesBal.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
 
         #### setting models to tables ###
         self.tblInventory.setModel(self.proxyInventory)
-
+        self.tblPurchases.setModel(self.proxyPurchases)
+        self.tblSales.setModel(self.proxySales)
+        self.tblClients.setModel(self.proxyClients)
         # bal
         self.tblPurchasesBal.setModel(self.proxyPurchasesBal)
         self.tblSalesBal.setModel(self.proxySalesBal)
@@ -72,6 +81,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.actionRefresh.triggered.connect(self.refreshTables)
         self.actionPurchase.triggered.connect(self.action_purchase)
         self.actionSale.triggered.connect(self.action_sale)
+        self.actionClient.triggered.connect(self.action_client)
 
         self.leditInventory.textEdited.connect(lambda: self.search(self.leditInventory.text(), self.proxyInventory))
 
@@ -107,6 +117,22 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
             self.mdlInventory.setHeaderData(i, QtCore.Qt.Horizontal, headers[i]) # +1 for id col
 
 
+        headers = ["Date", "Transaction", "Code", "Name", "Group", "Quantity", "Vendor",
+                    "Unit Cost", "Total Cost", "Category"]
+        for i in range(len(headers)):
+            self.mdlPurchases.setHeaderData(i, QtCore.Qt.Horizontal, headers[i])
+
+        headers = ["Date", "Transaction", "Code", "Name", "Group", "Quantity", "Unit Price",
+                    "Total Price", "Client", "Pay"]
+        for i in range(len(headers)):
+            self.mdlSales.setHeaderData(i, QtCore.Qt.Horizontal, headers[i])
+        
+
+        headers = ["ID", "Name", "Invested", "Debt",
+                    "E-mail", "Phone", "Cellphone"]
+        for i in range(len(headers)):
+            self.mdlClients.setHeaderData(i, QtCore.Qt.Horizontal, headers[i])
+
         # headers bal
         headers = ["Date", "Transaction", "Code", "Quantity", "Total Cost"]
         for i in range(len(headers)):
@@ -118,6 +144,9 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         ### table uniform stretch ###
         self.tblInventory.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
+        self.tblPurchases.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
+        self.tblSales.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
+        self.tblClients.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
 
         # bal stretch
         self.tblBalance.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
@@ -232,6 +261,10 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         proxy.setFilterRegExp("^" + text)
 
+    def action_client(self):
+
+        client = Client(self)
+        client.show()
 
     def action_sale(self):
 
