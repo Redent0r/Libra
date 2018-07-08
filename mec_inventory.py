@@ -523,6 +523,69 @@ def calc_cre(cursor,date = None):
  
 #-------------------------------------------------------------------------------------------------------
  
+def del_general(connection,cursor,trans):
+    """
+        Generalizes use of delete function.
+        Clients table delete not included.
+    """
+    try:
+        if(trans[0] == '1'):
+            return del_item_entries(connection,cursor,trans)
+        elif(trans[0] == '2'):
+            return del_item_salidas(connection,cursor,trans)
+        else:
+            print('Unknown transaction number')
+            return False
+ 
+    except TypeError:
+        print('Error in cell')
+        return False
+
+def del_item_entries(connection,cursor,trans):
+    """
+        Deletes items from entries by transaction number.
+    """
+    cursor.execute('DELETE FROM Entries WHERE trans = ?',(trans,))
+    connection.commit()
+    return True
+def del_item_inventory(connection,cursor,code,groupx):
+    """
+        Deletes items from inventory by code.
+    """
+    cursor.execute('DELETE FROM Inventory WHERE code = ? AND groupx = ?',(code,groupx))
+    connection.commit()
+    return True
+def del_item_salidas(connection,cursor,trans):
+    """
+        Deletes items by transaction number.
+    """
+    cursor.execute('SELECT quantity FROM Outs WHERE trans = ?',(trans,))
+    data = cursor.fetchone()
+    if (data == None):
+        print('Transaction number not from an Out')
+        return False
+    cursor.execute('SELECT priceItems,client FROM Outs WHERE trans = ?',(trans,))
+    p = cursor.fetchone()
+    cursor.execute('SELECT money_invested FROM Clients WHERE name = ? ',(p[1],))
+    d = cursor.fetchone()
+    f = d[0]- p[0]
+    cursor.execute('UPDATE Clients SET money_invested = ? WHERE name = ?',(f,p[1]))
+
+    cursor.execute('SELECT code,groupx FROM Outs WHERE trans = ?',(trans,))
+    data2 = cursor.fetchone()
+    #-------------------------------------------------------------------------------------------------------
+    g = (data2[0],data2[1])
+    cursor.execute('SELECT avail FROM Inventory WHERE code = ? AND groupx = ?',g)
+    data3 = cursor.fetchone()
+    avail = data3[0] + data[0]
+    b =(avail,data2[0],data2[1])
+    cursor.execute('UPDATE Inventory SET avail = ? WHERE code = ? AND groupx = ?',b)
+    #-------------------------------------------------------------------------------------------------------
+    cursor.execute('DELETE FROM Outs WHERE trans = ?',(trans,))
+
+
+    connection.commit()
+    return True
 
 def auto_del_0(connection,cursor):
     cursor.execute('SELECT avail FROM Inventory WHERE avail = 0')
