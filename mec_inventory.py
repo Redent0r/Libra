@@ -247,8 +247,19 @@ def update_client_info(connection,cursor,user):
     cursor.execute('UPDATE Clients SET bought = ?,money_invested = ?,paid = ?,debt = ? WHERE name = ?',(articles,money,debit,credit,user))
 
     connection.commit()
+     
+
+def del_client_id(connection,cursor,identification):
+    cursor.execute('DELETE FROM Clients WHERE identification = ?',(identification,))
+    connection.commit()
+    return True
 
 
+def del_client_name(connection,cursor,name):
+    cursor.execute('DELETE FROM Clients WHERE name = ?',(name,))
+    connection.commit()
+    return True
+     
 #-------------------------------------------------------------------------------------------------------
 def calc_bal_his(cursor):
     """

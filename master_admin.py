@@ -14,7 +14,9 @@ from gui_purchase import Ui_Dialog as PurchaseGui
 from gui_sale import Ui_Dialog as SaleGui
 from gui_client import Ui_Dialog as ClientGui
 
-import mec_inventory# stresstest
+
+import mec_inventory#, stresstest
+
 
 class Inventory (QtGui.QMainWindow, InventoryGui):
     ### constants ###
@@ -82,8 +84,10 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.actionPurchase.triggered.connect(self.action_purchase)
         self.actionSale.triggered.connect(self.action_sale)
         self.actionClient.triggered.connect(self.action_client)
+        self.btnRemovePurchase.clicked.connect(self.remove_purchase)
+        self.btnRemoveSale.clicked.connect(self.reverse_sale)
         self.btnSettle.clicked.connect(self.settle_debt)
-
+        self.btnRemoveClient.clicked.connect(self.remove_client)
         self.leditInventory.textEdited.connect(lambda: self.search(self.leditInventory.text(), self.proxyInventory))
         self.leditPurchases.textEdited.connect(lambda: self.search(self.leditPurchases.text(), self.proxyPurchases))
         self.leditSales.textEdited.connect(lambda: self.search(self.leditSales.text(), self.proxySales))
@@ -296,6 +300,104 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
     def search(self, text, proxy):
 
         proxy.setFilterRegExp("^" + text)
+
+    def remove_client(self):
+
+        index = self.tblClients.selectionModel().selectedRows()
+
+        if index:
+
+            row = int(index[0].row()) # selected row
+            name = self.proxyClients.data(self.proxyClients.index(row, 1)) # 0 = fecha, 1 = codigo
+
+            msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Delete",
+                                        "Are you sure you want to delete: " + name + "?", parent=self)
+            btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+            btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+            msgbox.exec_()
+
+            if msgbox.clickedButton() == btnYes:
+
+                if mec_inventory.del_client_name(self.conn, self.c, name):
+                    self.refreshTables() # refresh
+                    QtGui.QMessageBox.information(self, 'Message', "The client: " + name +
+                                                        "\nhas been deleted sucessfully")
+                else:
+
+                    QtGui.QMessageBox.critical(self, 'Error', 'An unexpected error has occurred.\n'+
+                                                            'Please try again.')
+
+            self.tblClients.clearSelection() # clear choice
+
+        else:
+            QtGui.QMessageBox.information(self, 'Message', "Please select the \n" +
+                                 "client you wish to delete")
+
+    def remove_purchase(self):
+
+        index = self.tblPurchases.selectionModel().selectedRows()
+        if index:
+            row = int(index[0].row()) # selected row
+            code = self.proxyPurchases.data(self.proxyPurchases.index(row, 1)) # 0 = fecha, 1 = codigo
+
+            msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Delete",
+                                        "Are you sure you want to delete purchase\n"
+                                         " number: " + code + "?", parent=self)
+            btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+            btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+            msgbox.exec_()
+
+            if msgbox.clickedButton() == btnYes:
+
+                if mec_inventory.del_general(self.conn, self.c, code):
+                    self.refreshTables() # refresh
+                    QtGui.QMessageBox.information(self, 'Message', "Purchase number: " + code +
+                                                        "\nhas been deleted successfully.\n" +
+                                                        "Inventory must be reduced manually")
+                else:
+
+                    QtGui.QMessageBox.critical(self, 'Error', 'An unexpected error has occurred.\n'+
+                                                            'Please try again.')
+
+            self.tblPurchases.clearSelection() # clear choice
+
+        else:
+            QtGui.QMessageBox.information(self, 'Message', "Please select the\n" +
+                                 "purchase that you want to delete")
+
+    def reverse_sale(self):
+
+        index = self.tblSales.selectionModel().selectedRows()
+        if index:
+            row = int(index[0].row()) # selected row
+            code = self.proxySales.data(self.proxySales.index(row, 1)) # 0 = fecha, 1 = codigo
+
+            msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Reverse",
+                                        "Are you sure you want to reverse\n"
+                                         "purchase number: " + code + "?", parent=self)
+            btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+            btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+            msgbox.exec_()
+
+            if msgbox.clickedButton() == btnYes:
+
+                if mec_inventory.del_general(self.conn, self.c, code):
+                    self.refreshTables() # refresh
+                    QtGui.QMessageBox.information(self, 'Message', "Purchase number: " + code +
+                                                        "\nhas been reversed successfully")
+                else:
+
+                    QtGui.QMessageBox.critical(self, 'Error', 'An unexpected error has occurred.\n'+
+                                                            'Please try again.')
+
+            self.tblSales.clearSelection() # clear choice
+
+        else:
+            QtGui.QMessageBox.warning(self, 'Message', "Please select the\n" +
+                                 "purchase you want to reverse")
 
     def action_client(self):
 
