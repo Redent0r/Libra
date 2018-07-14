@@ -90,7 +90,14 @@ def add_item_exit_fixed(connection,cursor,code = "#",quantity = 1,tax = 0.07,pri
     #-------------------------------------------------------------------------------------------------------
     return True
 #-------------------------------------------------------------------------------------------------------
-
+'''
+def modify(connection,cursor,code,groupx,avail,priceUni,category,smin,smax,costUni, name):
+    if (groupx == 'Global'):
+        cursor.execute('UPDATE Inventory SET name = ?,priceUniSug = ?,category = ?, stockmin = ?,stockmax = ? ,costUni = ? WHERE code = ?',(name,priceUni,category,smin,smax,costUni,code))
+    else:
+        cursor.execute('UPDATE Inventory SET name = ?,avail = ?,priceUniSug = ?,category = ?, stockmin = ?,stockmax = ? ,costUni = ? WHERE code = ? AND groupx = ?',(name,avail,priceUni,category,smin,smax,costUni,code,groupx))
+    connection.commit()
+'''
    
 
 def shopping_cart(connection,cursor,lista):
@@ -190,7 +197,15 @@ def query_sale(cursor,code,groupx):
         return False
 
     return data 
-
+'''
+def query_modify(cursor,code,groupx):
+    """
+         Returns [avail,priceUniSug,costUni,category,stockmin,stockmax,name]
+    """
+    cursor.execute('SELECT avail,priceUniSug,costUni,category,stockmin,stockmax, name FROM Inventory WHERE code = ? AND groupx = ?',(code,groupx))
+    data = cursor.fetchone()
+    return data
+'''
 #-------------------------------------------------------------------------------------------------------
  
 def add_client(connection,cursor,identification,name,mail,num,cel,fax,direction):
