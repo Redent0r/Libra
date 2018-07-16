@@ -13,7 +13,7 @@ from gui_inventory import Ui_MainWindow as InventoryGui
 from gui_purchase import Ui_Dialog as PurchaseGui
 from gui_sale import Ui_Dialog as SaleGui
 from gui_client import Ui_Dialog as ClientGui
-
+from gui_modify import Ui_Dialog as ModifyGui
 
 import mec_inventory#, stresstest
 
@@ -84,6 +84,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.actionPurchase.triggered.connect(self.action_purchase)
         self.actionSale.triggered.connect(self.action_sale)
         self.actionClient.triggered.connect(self.action_client)
+        self.btnModifyInventory.clicked.connect(self.modify_inventory)
         self.btnRemovePurchase.clicked.connect(self.remove_purchase)
         self.btnRemoveSale.clicked.connect(self.reverse_sale)
         self.btnSettle.clicked.connect(self.settle_debt)
@@ -300,6 +301,22 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
     def search(self, text, proxy):
 
         proxy.setFilterRegExp("^" + text)
+
+    def modify_inventory(self):
+
+        index = self.tblInventory.selectionModel().selectedRows() ### list of indexes
+        if index:
+            
+            row = int(index[0].row()) # selected row
+            code = self.proxyInventory.data(self.proxyInventory.index(row, 0))
+            group = self.proxyInventory.data(self.proxyInventory.index(row, 2))
+            modifyInventory = ModifyInventory(code, group, self)
+            modifyInventory.show()
+            self.tblInventory.clearSelection() # clear choice
+
+        else:
+            QtGui.QMessageBox.information(self, 'Message', "Please select the \n" +
+                                 "item you wish to modify")
 
     def remove_client(self):
 
@@ -932,6 +949,125 @@ class Client(QtGui.QDialog, ClientGui):
         self.leditAddress.clear()
         self.leditFax.clear()
         self.leditEmail.clear()
+
+class ModifyInventory(QtGui.QDialog, ModifyGui):
+        
+    def __init__(self, code, group, parent=None):
+
+        QtGui.QDialog.__init__(self, parent)
+        
+        self.setupUi(self)
+
+        # parent connection
+        self.conn = self.parent().conn
+        self.c = self.parent().c
+
+        self.leditCode.setText(code)
+        self.cmboxGroup.addItem(group)
+        self.cmboxGroup.addItem("Global")
+
+        items = mec_inventory.query_modify(self.c, code, group)
+        # Returns [disponible,precioUniSug,costoUni,categoria,stockmin,stockmax]
+
+        if items:
+
+            self.available = items[0]
+            self.price = items[1]
+            self.cost = items[2]
+            self.category = items[3]
+            self.min = items[4]
+            self.max = items[5] 
+            self.name = items[6]
+
+            self.spnboxAvailable.setValue(self.available)
+            self.spnboxPrice.setValue(self.price)
+            self.spnboxCost.setValue(self.cost)
+            self.cmboxCategory.setEditText(self.category)
+            self.spnboxMin.setValue(self.min)
+            self.spnboxMax.setValue(self.max)
+            self.leditName.setText(self.name)
+            self.spnboxMargin.setValue(((self.price / self.cost) - 1) * 100)
+
+        ### functionality ###
+        self.btnModify.clicked.connect(self.modify_inventory)
+        self.btnUndo.clicked.connect(self.undo)
+        
+        self.spnboxMargin.valueChanged.connect(self.margin_changed)
+        self.spnboxPrice.valueChanged.connect(self.price_changed)
+        self.spnboxCost.valueChanged.connect(self.cost_changed)
+
+    def modify_inventory(self):
+        
+        msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Modify",
+                                        "Are you sure you want\n"
+                                         "to modify this item?", parent=self)
+        btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+        btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+        msgbox.exec_()
+
+        if msgbox.clickedButton() == btnYes:
+
+            start = time.time()
+
+            code = self.leditCode.text()
+            name = self.leditName.text()
+            cost = self.spnboxCost.value()
+            margin = self.spnboxMargin.value()
+            price = self.spnboxPrice.value()
+            available = self.spnboxAvailable.value()
+            group = self.cmboxGroup.currentText()
+            cat = self.cmboxCategory.currentText().capitalize()
+            stockMin = self.spnboxMin.value() 
+            stockMax = self.spnboxMax.value() 
+           
+            ### modificando ###
+            mec_inventory.modify(self.conn, self.c, code, group,
+                                 available, price, cat, stockMin, stockMax, cost, name)
+
+            self.parent().refreshTables()
+            QtGui.QMessageBox.information(self, 'Message', 'The modification has been\n'+
+                                                                    'registered successfully')
+            self.close()
+                
+            end = time.time()
+            print("modificar time: " + str(end-start))
+
+
+
+    def cost_changed(self):
+
+        self.spnboxMargin.setValue(0)
+        self.spnboxPrice.setValue(0)
+
+    def price_changed(self):
+
+        cost = self.spnboxCost.value()
+        if cost > 0:
+            price = self.spnboxPrice.value()
+            margin = (price/cost - 1) * 100
+
+            self.spnboxMargin.setValue(margin)
+
+    def margin_changed(self):
+
+        margin = self.spnboxMargin.value()
+        cost = self.spnboxCost.value()
+        price = cost * (1 + margin/100)
+
+        self.spnboxPrice.setValue(price)
+
+    def undo(self):
+ 
+        self.leditName.setText(self.name)
+        self.spnboxCost.setValue(self.cost)
+        self.spnboxAvailable.setValue(self.available)
+        self.spnboxMargin.setValue((self.price / self.cost - 1) * 100)
+        self.spnboxPrice.setValue(self.price)
+        self.cmboxCategory.setEditText(self.category)
+        self.cmboxGroup.setCurrentIndex(0)
+        self.spnboxMin.setValue(self.min)
+        self.spnboxMax.setValue(self.max)
 
 ##################### starts everything #############################################
 if __name__ == "__main__":
