@@ -62,7 +62,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>1</number>
       </property>
       <property name="iconSize">
        <size>
@@ -926,6 +926,26 @@
             <property name="icon">
              <iconset resource="res.qrc">
               <normaloff>:/icons/resources/Remove.png</normaloff>:/icons/resources/Remove.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnModifyClient">
+            <property name="toolTip">
+             <string>Modify Client</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="res.qrc">
+              <normaloff>:/icons/resources/edit_user_male_write_pencil_man-512.png</normaloff>:/icons/resources/edit_user_male_write_pencil_man-512.png</iconset>
             </property>
             <property name="iconSize">
              <size>
