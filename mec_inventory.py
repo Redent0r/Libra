@@ -97,6 +97,10 @@ def modify(connection,cursor,code,groupx,avail,priceUni,category,smin,smax,costU
         cursor.execute('UPDATE Inventory SET name = ?,avail = ?,priceUniSug = ?,category = ?, stockmin = ?,stockmax = ? ,costUni = ? WHERE code = ? AND groupx = ?',(name,avail,priceUni,category,smin,smax,costUni,code,groupx))
     connection.commit()
 
+def modify_client(connection,cursor,name,identification,mail,num,cel,fax,direction):
+    sel = (identification,mail,num,cel,fax,direction,name)
+    cursor.execute('UPDATE Clients SET identification = ?,mail = ?,num = ?,cel = ?,fax = ?,direction = ? WHERE name = ?',sel)
+    connection.commit()
    
 
 def shopping_cart(connection,cursor,lista):
@@ -202,6 +206,14 @@ def query_modify(cursor,code,groupx):
          Returns [avail,priceUniSug,costUni,category,stockmin,stockmax,name]
     """
     cursor.execute('SELECT avail,priceUniSug,costUni,category,stockmin,stockmax, name FROM Inventory WHERE code = ? AND groupx = ?',(code,groupx))
+    data = cursor.fetchone()
+    return data
+
+def query_client(cursor,name):
+    """
+        Returns [identification,mail,num,cel,fax,direction,bought,money_invested,paid,debt]
+    """
+    cursor.execute('SELECT identification,mail,num,cel,fax,direction FROM Clients WHERE name = ?',(name,))
     data = cursor.fetchone()
     return data
 
