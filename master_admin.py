@@ -15,6 +15,8 @@ from gui_sale import Ui_Dialog as SaleGui
 from gui_client import Ui_Dialog as ClientGui
 from gui_modify import Ui_Dialog as ModifyGui
 
+from gui_client_modify import Ui_Dialog as ClientModifyGui
+
 import mec_inventory#, stresstest
 
 
@@ -85,10 +87,12 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.actionSale.triggered.connect(self.action_sale)
         self.actionClient.triggered.connect(self.action_client)
         self.btnModifyInventory.clicked.connect(self.modify_inventory)
+        self.btnMove.clicked.connect(self.move_item)
         self.btnRemovePurchase.clicked.connect(self.remove_purchase)
         self.btnRemoveSale.clicked.connect(self.reverse_sale)
         self.btnSettle.clicked.connect(self.settle_debt)
         self.btnRemoveClient.clicked.connect(self.remove_client)
+        self.btnModifyClient.clicked.connect(self.modify_client)
         self.leditInventory.textEdited.connect(lambda: self.search(self.leditInventory.text(), self.proxyInventory))
         self.leditPurchases.textEdited.connect(lambda: self.search(self.leditPurchases.text(), self.proxyPurchases))
         self.leditSales.textEdited.connect(lambda: self.search(self.leditSales.text(), self.proxySales))
@@ -302,6 +306,22 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         proxy.setFilterRegExp("^" + text)
 
+    def move_item(self):
+
+        index = self.tblInventory.selectionModel().selectedRows() ### list of indexes
+        if index:
+
+            row = int(index[0].row()) # selected row
+            code = self.proxyInventory.data(self.proxyInventory.index(row, 0))
+            group = self.proxyInventory.data(self.proxyInventory.index(row, 2))
+            available = self.proxyInventory.data(self.proxyInventory.index(row, 3))
+            move = Move(code, available, group, self)
+            move.show()
+
+        else:
+            QtGui.QMessageBox.information(self, 'Message', "Please select the \n" +
+                                 "item you wish to move")
+
     def modify_inventory(self):
 
         index = self.tblInventory.selectionModel().selectedRows() ### list of indexes
@@ -350,6 +370,21 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         else:
             QtGui.QMessageBox.information(self, 'Message', "Please select the \n" +
                                  "client you wish to delete")
+
+    def modify_client(self):
+
+        index = self.tblClients.selectionModel().selectedRows()
+
+        if index:
+
+            row = int(index[0].row()) # selected row
+            name = self.proxyClients.data(self.proxyClients.index(row, 1)) # 0 = fecha, 1 = codigo
+            modifyClient = ModifyClient(name, self)
+            modifyClient.show()
+
+        else:
+            QtGui.QMessageBox.information(self, 'Message', "Please select the \n" +
+                                 "client you wish to modify")
 
     def remove_purchase(self):
 
@@ -1033,8 +1068,6 @@ class ModifyInventory(QtGui.QDialog, ModifyGui):
             end = time.time()
             print("modificar time: " + str(end-start))
 
-
-
     def cost_changed(self):
 
         self.spnboxMargin.setValue(0)
@@ -1068,6 +1101,97 @@ class ModifyInventory(QtGui.QDialog, ModifyGui):
         self.cmboxGroup.setCurrentIndex(0)
         self.spnboxMin.setValue(self.min)
         self.spnboxMax.setValue(self.max)
+
+class ModifyClient(QtGui.QDialog, ClientModifyGui):
+
+    def __init__(self, name, parent=None):
+
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
+
+        self.leditName.setText(name)
+
+        # functionality
+        self.btnUndo.clicked.connect(self.undo)
+        self.btnModify.clicked.connect(self.modify)
+
+        ### validators ###
+        regexpPhone = QtCore.QRegExp("^[0-9-()]*$") # 0-9 or - or ()
+        phoneVal = QtGui.QRegExpValidator(regexpPhone)
+        self.leditPhone.setValidator(phoneVal)
+        self.leditCellphone.setValidator(phoneVal)
+        self.leditFax.setValidator(phoneVal)
+
+        ### connection, from parent ###
+        self.conn = self.parent().conn
+        self.c = self.parent().c
+
+        info = mec_inventory.query_client(self.c, name)
+        if info:
+
+            self.id = info[0]
+            self.email = info[1]
+            self.phone = info[2]
+            self.cel = info[3]
+            self.fax = info[4]
+            self.address = info[5]
+
+            self.leditName.setText(name)
+            self.leditID.setText(info[0])
+            self.leditEmail.setText(info[1])
+            self.leditPhone.setText(info[2])
+            self.leditCellphone.setText(info[3])
+            self.leditFax.setText(info[4])
+            self.leditAddress.setText(info[5])
+
+        else:
+
+            QtGui.QMessageBox.warning(self, 'Error','An unexpected error has occurred.\n'+
+                                                        'Please try again')
+            self.close()
+
+
+    def modify(self):
+        
+        msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Add Client",
+                                    "Are you sure you want\n"
+                                     "to modify this client?", parent=self)
+        btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+        btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+        msgbox.exec_()
+
+        if msgbox.clickedButton() == btnYes:
+
+            start = time.time()
+
+            name = self.leditName.text()
+            id = self.leditID.text()
+            phone = self.leditPhone.text()
+            cell = self.leditCellphone.text()
+            address = self.leditAddress.text().capitalize()
+            email = self.leditEmail.text()
+            fax = self.leditFax.text()
+
+            mec_inventory.modify_client(self.conn, self.c, name, id,
+                                        email, phone, cell, fax, address)
+                
+            self.parent().refreshTables()
+            QtGui.QMessageBox.information(self, 'Message', 'The client has been\n'+
+                                                                'modified successfully')
+            self.close()
+                
+            end = time.time()
+            print("time mod cliente: " + str(end - start))
+
+    def undo(self):
+
+        self.leditID.setText(self.id)
+        self.leditPhone.setText(self.phone)
+        self.leditCellphone.setText(self.cel)
+        self.leditAddress.setText(self.address)
+        self.leditFax.setText(self.fax)
+        self.leditEmail.setText(self.email)
 
 ##################### starts everything #############################################
 if __name__ == "__main__":
