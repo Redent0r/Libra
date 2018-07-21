@@ -102,6 +102,20 @@ def modify_client(connection,cursor,name,identification,mail,num,cel,fax,directi
     cursor.execute('UPDATE Clients SET identification = ?,mail = ?,num = ?,cel = ?,fax = ?,direction = ? WHERE name = ?',sel)
     connection.commit()
    
+    
+def move(connection,cursor,code,groupx1,groupx2,quantity):
+    cursor.execute('SELECT code,name,avail,costUni,priceUniSug,groupx,category,stockmin,stockmax FROM Inventory WHERE code = ? and groupx = ?',(code,groupx1))
+    data = cursor.fetchone()
+    decrease_stock(cursor,code,groupx1,quantity)
+    auto_del_0(connection,cursor)
+    cursor.execute('SELECT name FROM Inventory WHERE code = ? AND groupx = ?' , (code,groupx2))
+    data2 = cursor.fetchone()
+    if (data2 == None):
+        c = (data[0],data[1],quantity,data[3],data[4],groupx2,data[6],data[7],data[8])
+        cursor.execute('INSERT INTO Inventory (code,name,avail,costUni,priceUniSug,groupx,category,stockmin,stockmax) VALUES(?,?,?,?,?,?,?,?,?)',c)
+    else:
+        increase_stock(cursor,code,groupx2,quantity)
+    connection.commit()
 
 def shopping_cart(connection,cursor,lista):
     """
