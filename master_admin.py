@@ -14,7 +14,7 @@ from gui_purchase import Ui_Dialog as PurchaseGui
 from gui_sale import Ui_Dialog as SaleGui
 from gui_client import Ui_Dialog as ClientGui
 from gui_modify import Ui_Dialog as ModifyGui
-
+from gui_move import Ui_Dialog as MoveGui
 from gui_client_modify import Ui_Dialog as ClientModifyGui
 
 import mec_inventory#, stresstest
@@ -86,6 +86,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
         self.actionPurchase.triggered.connect(self.action_purchase)
         self.actionSale.triggered.connect(self.action_sale)
         self.actionClient.triggered.connect(self.action_client)
+
         self.btnModifyInventory.clicked.connect(self.modify_inventory)
         self.btnMove.clicked.connect(self.move_item)
         self.btnRemovePurchase.clicked.connect(self.remove_purchase)
@@ -310,7 +311,7 @@ class Inventory (QtGui.QMainWindow, InventoryGui):
 
         index = self.tblInventory.selectionModel().selectedRows() ### list of indexes
         if index:
-
+            
             row = int(index[0].row()) # selected row
             code = self.proxyInventory.data(self.proxyInventory.index(row, 0))
             group = self.proxyInventory.data(self.proxyInventory.index(row, 2))
@@ -546,7 +547,7 @@ class Purchase(QtGui.QDialog, PurchaseGui):
         code = self.cmBoxCode.currentText()
         if self.code != code:
             self.cmboxGroup.clear()
-            self.cmboxGroup.addItems(mec_inventory.unique(self.c, "groupx", "Inventory", "code", code))
+            self.cmboxGroup.addItems(mec_inventory.unique(self.c, "group", "inventory", "code", code))
             self.code = code
         self.group_return()
 
@@ -1193,6 +1194,51 @@ class ModifyClient(QtGui.QDialog, ClientModifyGui):
         self.leditFax.setText(self.fax)
         self.leditEmail.setText(self.email)
 
+class Move(QtGui.QDialog, MoveGui):
+
+    def __init__(self, code, available, group, parent=None):
+
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
+
+        self.conn = self.parent().conn
+        self.c = self.parent().c
+
+        self.leditCode.setText(code)
+        self.spnboxQuantity.setMaximum(available)
+        self.leditFromGroup.setText(str(group))
+
+        self.cmboxToGroup.addItems(mec_inventory.unique(self.c, "groupx", "inventory", "code", code))
+        self.cmboxToGroup.removeItem(self.cmboxToGroup.findText(group))
+
+        self.btnConfirm.clicked.connect(self.confirm)
+
+    def confirm(self):
+        
+        msgbox = QtGui.QMessageBox(QtGui.QMessageBox.Icon(4), "Sell",
+                                        "Are you sure you want to\n"
+                                         "move this item?", parent=self)
+        btnYes = msgbox.addButton("Yes", QtGui.QMessageBox.ButtonRole(0)) # yes
+        btnNo = msgbox.addButton("No", QtGui.QMessageBox.ButtonRole(1)) # no
+
+        msgbox.exec_()
+
+        if msgbox.clickedButton() == btnYes:
+
+            code = self.leditCode.text()
+            quantity = self.spnboxQuantity.value()
+            fromGroup = self.leditFromGroup.text()
+            toGroup = self.cmboxToGroup.currentText()
+
+            print(str(code) + str(quantity) + str(fromGroup) + str(toGroup))
+
+            mec_inventory.move(self.conn, self.c, code, fromGroup, toGroup, quantity)
+            self.parent().refreshTables()
+
+            QtGui.QMessageBox.information(self, 'Message', 'The operation has been \n'+
+                                                            'made successfully')
+
+        self.close()
 ##################### starts everything #############################################
 if __name__ == "__main__":
 
